@@ -1,0 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+@import "tailwindcss";
+
+:root {
+  --primary: #bf60ff;
+  --primary-dark: #8500dd;
+  --secondary: #00d49f;
+  --background: #040018;
+  --text: #d1d1d1;
+}
+
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-text: var(--text);
+}
+
+body {
+  font-family: "Roboto Slab", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.link {
+  color: var(--primary);
+  transition: color .15s ease-in-out;
+}
+
+.link:hover {
+  color: var(--text);
+}
+
+.button {
+  font: inherit;
+  background-color: var(--primary-dark);
+  color: inherit;
+  border: 2px solid var(--primary);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all .15s ease-in-out;
+}
+
+.button:hover {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.button:focus {
+  outline: none;
+  border: 2px solid var(--secondary);
+} 
