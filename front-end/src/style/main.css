@@ -28,7 +28,7 @@ body {
 }
 
 .link {
-  color: var(--primary);
+  color: var(--secondary);
   transition: color .15s ease-in-out;
 }
 
