@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import CustomAPIError from "../errors/custom-api.js";
 
 const errorHandler = (err, req, res, next) => {
@@ -6,7 +7,41 @@ const errorHandler = (err, req, res, next) => {
       .status(err.statusCode)
       .json({ success: false, msg: err.message });
   }
-  return res.status(500).json({ success: false, msg: "Something went wrong" });
+
+  let customError = {
+    statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+    msg: err.message || "Something went wrong try again later",
+  };
+
+  if (err.name === "ValidationError") {
+    customError.msg = Object.values(err.errors)
+      .map(item => item.message)
+      .join(", ");
+    customError.statusCode = StatusCodes.BAD_REQUEST;
+  }
+
+  if (err.name === "SyntaxError") {
+    customError.msg = "Invalid data format";
+    customError.statusCode = StatusCodes.BAD_REQUEST;
+  }
+
+  if (err.name === 'CastError') {
+    customError.msg = `No item found with id : ${err.value}`
+    customError.statusCode = StatusCodes.NOT_FOUND
+  }
+
+  if (err.code === 11000) {
+    customError.msg = `Duplicate value entered for ${Object.keys(
+      err.keyValue
+    )}`;
+    customError.statusCode = StatusCodes.BAD_REQUEST;
+  }
+
+  console.log(err.name);
+
+  return res
+    .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    .json({ success: false, msg: customError.msg });
 };
 
 export default errorHandler;

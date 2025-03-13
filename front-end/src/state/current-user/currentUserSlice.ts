@@ -1,15 +1,24 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import API from "../../lib/axiosConfig";
+import { User } from "../../lib/zodSchemas";
 
-const initialState = {
+type CurrentUserState = {
+  currentUser: User | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+};
+
+const initialState: CurrentUserState = {
   currentUser: null,
   isAuthenticated: false,
+  loading: true,
 };
 
 const currentUserSlice = createSlice({
   name: "currentUser",
   initialState,
   reducers: {
-    setCurrentUser(state, action: PayloadAction<null>) {
+    setCurrentUser(state, action: PayloadAction<null | User>) {
       state.currentUser = action.payload;
       state.isAuthenticated = true;
     },
@@ -18,6 +27,29 @@ const currentUserSlice = createSlice({
       state.isAuthenticated = false;
     },
   },
+  extraReducers: builder => {
+    builder
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.currentUser = action.payload;
+        state.isAuthenticated = action.payload !== null;
+        state.loading = false;
+      })
+      .addCase(checkAuth.rejected, state => {
+        state.currentUser = null;
+        state.isAuthenticated = false;
+        state.loading = false;
+      });
+  },
+});
+
+export const checkAuth = createAsyncThunk("currentUser/checkAuth", async () => {
+  try {
+    const res = await API.get("/api/auth/check");
+    return res.data.user;
+    // eslint-disable-next-line
+  } catch (error) {
+    return null;
+  }
 });
 
 export const { setCurrentUser, clearCurrentUser } = currentUserSlice.actions;

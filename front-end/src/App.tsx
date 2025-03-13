@@ -1,44 +1,58 @@
-import { useSelector } from "react-redux";
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { RootState } from "./state/store";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { AppDispatch, RootState } from "./state/store";
 import LoginForm from "./components/auth/LoginForm";
 import RegistrationForm from "./components/auth/RegistrationForm";
 import Footer from "./components/Footer";
 import AuthLayout from "./components/layouts/AuthLayout";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import ForgotPassword from "./components/auth/ForgotPassword";
+import { useEffect } from "react";
+import { checkAuth } from "./state/current-user/currentUserSlice";
+import Logout from "./components/auth/Logout";
+import ConfirmMail from "./components/auth/ConfirmEmail";
 
 export default function App() {
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.currentUser.isAuthenticated
+  const { isAuthenticated, loading } = useSelector(
+    (state: RootState) => state.currentUser
   );
 
-  return (
-    <>
-      <Routes>
-        <Route
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <AuthLayout />
-          }
-        >
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegistrationForm />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-        </Route>
+  const dispatch = useDispatch<AppDispatch>();
+  const location = useLocation();
 
-        <Route
-          element={
-            isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
-          }
-        >
-          <Route path="/" element={<div>Home</div>} />
-          <Route path="/projects" element={<div>Projects</div>} />
-          <Route path="*" element={<div>404</div>} />
-        </Route>
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      </Routes>
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch, location]);
 
-      <Footer />
-    </>
-  );
+  if (!loading)
+    return (
+      <>
+        <Routes>
+          {/* Autoryzacja */}
+          {!isAuthenticated ? (
+            <>
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/register" element={<RegistrationForm />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/confirm-email/:token" element={<ConfirmMail />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </>
+          ) : (
+            <>
+              <Route element={<Outlet />}>
+                <Route path="/" element={<Logout />} />
+                <Route path="/projects" element={<div>Projects</div>} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
+
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        </Routes>
+
+        <Footer />
+      </>
+    );
 }

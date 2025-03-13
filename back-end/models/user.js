@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -26,9 +27,12 @@ const userSchema = new mongoose.Schema({
     ],
   },
   password: {
-    type: String,
+    type: String, 
     required: true,
-    min: 8,
+  },
+  isActivated: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -40,8 +44,14 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.createJWT = function () {
-  return jwt.sing({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
+userSchema.methods.createEmailJWT = function () {
+  return jwt.sign({ email: this.email }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
   });
 };
 
