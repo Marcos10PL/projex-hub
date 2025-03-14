@@ -2,39 +2,41 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, NavLink } from "react-router-dom";
 import API from "../../lib/axiosConfig";
-import { registerSchema } from "../../lib/zodSchemas";
+import { Register, registerSchema } from "../../lib/zodSchemas";
 import { useState } from "react";
 import ErrorMsg from "./ErrorMsg";
+import clsx from "clsx";
+import Spinner from "../Spinner";
 
 export default function RegistrationForm() {
-  const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [email, setEmail] = useState<string | undefined>(undefined);
-  const [message, setMessage] = useState<string | undefined>(undefined);
-
-  type Inputs = {
-    email: string;
-    username: string;
-    password: string;
-  };
+  const [errorMsg, setErrorMsg] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<Inputs>({ resolver: zodResolver(registerSchema) });
+  } = useForm({ resolver: zodResolver(registerSchema) });
 
-  const onSubmit: SubmitHandler<Inputs> = async data => {
+  const onSubmit: SubmitHandler<Register> = async data => {
     try {
+      setErrorMsg("");
+      setLoading(true);
       const res = await API.post("api/auth/register", data);
-      if (!res.data.success) {
-        throw new Error("Invalid login or password");
+      if (res.data.success) {
+        setSuccess(true);
+        setEmail(data.email);
       }
-      setSuccess(true);
-      setEmail(data.email);
+      setErrorMsg("Invalid username, password or email");
       // eslint-disable-next-line
     } catch (err) {
-      setErrorMsg("Invalid username, password or email");
+      // console.error(err);
+      setErrorMsg("Sorry, something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,21 +53,25 @@ export default function RegistrationForm() {
       // eslint-disable-next-line
     } catch (err) {
       // console.error(err);
-      setMessage("Sorry, but we couldn't send the email. <br /> Please try again later.");
+      setMessage(
+        "Sorry, but we couldn't send the email. <br /> Please try again later."
+      );
     }
   };
 
-  if(message) {
+  if (message) {
     return (
-      <div className="text-center" >
-        <p className="px-3 mb-6" dangerouslySetInnerHTML={{ __html: message }} />
+      <div className="text-center">
+        <p
+          className="px-3 mb-6"
+          dangerouslySetInnerHTML={{ __html: message }}
+        />
         <NavLink to="/login" className="link">
           Back to login
         </NavLink>
       </div>
-    )
+    );
   }
-
 
   if (success) {
     return (
@@ -133,8 +139,14 @@ export default function RegistrationForm() {
             , you can withdraw it at any time by deleting an account.
           </div>
 
-          <button type="submit" className="button w-full my-3">
-            Register
+          <button
+            type="submit"
+            className={clsx(
+              "button w-full my-3 h-11",
+              loading && "opacity-80 pointer-events-none"
+            )}
+          >
+            {loading ? <Spinner size={1.5} /> : "Register"}
           </button>
         </form>
 

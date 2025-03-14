@@ -28,6 +28,14 @@ export const loginSchema = z.object({
   password: userSchema.shape.password,
 });
 
-export const registerSchema = userSchema.omit({ _id: true })
+export const registerSchema = userSchema.omit({ _id: true });
+
+export const forgotPasswordSchema = z.object({
+  email: userSchema.shape.email,
+});
+
+export type ForgotPassowrd = z.infer<typeof forgotPasswordSchema>;
+export type Login = z.infer<typeof loginSchema>;
+export type Register = z.infer<typeof registerSchema>;
 
 export type User = z.infer<typeof userSchema>;

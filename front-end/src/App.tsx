@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { checkAuth } from "./state/current-user/currentUserSlice";
 import Logout from "./components/auth/Logout";
 import ConfirmMail from "./components/auth/ConfirmEmail";
+import Spinner from "./components/Spinner";
 
 export default function App() {
   const { isAuthenticated, loading } = useSelector(
@@ -23,6 +24,13 @@ export default function App() {
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch, location]);
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner size={8} />
+      </div>
+    );
 
   if (!loading)
     return (

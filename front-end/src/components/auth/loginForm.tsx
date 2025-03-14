@@ -4,37 +4,40 @@ import API from "../../lib/axiosConfig";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { loginSchema } from "../../lib/zodSchemas";
+import { Login, loginSchema } from "../../lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "./ErrorMsg";
+import Spinner from "../Spinner";
+import clsx from "clsx";
 
 export default function LoginhtmlForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
-
-  type Inputs = {
-    login: string;
-    password: string;
-  };
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<Inputs>({ resolver: zodResolver(loginSchema) });
+  } = useForm({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit: SubmitHandler<Inputs> = async data => {
+  const onSubmit: SubmitHandler<Login> = async data => {
     try {
+      setErrorMsg("");
+      setLoading(true);
       const res = await API.post("api/auth/login", data);
-      if (!res.data.success) {
-        throw new Error("Invalid login or password");
+      if (res.data.success) {
+        dispatch(setCurrentUser(res.data.user));
+        navigate("/");
       }
-      dispatch(setCurrentUser(res.data.user));
-      navigate("/");
+      setErrorMsg("Invalid login or password");
       // eslint-disable-next-line
     } catch (err) {
-      setErrorMsg("Invalid login or password");
+      // console.error(err);
+      setErrorMsg("Sorry, something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,8 +68,8 @@ export default function LoginhtmlForm() {
           </NavLink>
         </div>
 
-        <button type="submit" className="button w-full">
-          Login
+        <button type="submit" className={clsx("button w-full", loading && "pointer-events-none opacity-80")}>
+          {loading ? <Spinner size={1.5} /> : "Login"}
         </button>
       </form>
 
