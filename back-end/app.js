@@ -9,23 +9,34 @@ import cookieParser from "cookie-parser";
 import projectsRouter from "./routes/projects.js";
 import auth from "./middlewares/authentication.js";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 // config
 dotenv.config();
 const app = express();
-const port = process.env.PORT || 3000;
-const corsUrl = process.env.CORS_URL || "http://localhost:5173";
+const port = process.env.PORT;
+const corsUrl = process.env.CORS_URL;
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  limit: 100,
+  message: {
+    success: false,
+    msg: "Too many requests, please try again after 15 minutes",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // middleware
+app.set("trust proxy", 1);
+app.use(apiLimiter);
+app.use(helmet());
 app.use(cors({ origin: corsUrl, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
 // routes
-app.get("/", (req, res) => {
-  res.send("Hello, world!");
-});
-
 app.use("/api/auth", authRouter);
 app.use("/api/projects", auth, projectsRouter);
 

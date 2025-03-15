@@ -44,7 +44,7 @@ const currentUserSlice = createSlice({
 
 export const checkAuth = createAsyncThunk("currentUser/checkAuth", async () => {
   try {
-    const res = await API.get("/api/auth/check");
+    const res = await API.get("auth/check");
     return res.data.user;
     // eslint-disable-next-line
   } catch (error) {

@@ -12,6 +12,7 @@ import { checkAuth } from "./state/current-user/currentUserSlice";
 import Logout from "./components/auth/Logout";
 import ConfirmMail from "./components/auth/ConfirmEmail";
 import Spinner from "./components/Spinner";
+import ResetPassword from "./components/auth/ResetPassword";
 
 export default function App() {
   const { isAuthenticated, loading } = useSelector(
@@ -36,7 +37,6 @@ export default function App() {
     return (
       <>
         <Routes>
-          {/* Autoryzacja */}
           {!isAuthenticated ? (
             <>
               <Route element={<AuthLayout />}>
@@ -44,6 +44,10 @@ export default function App() {
                 <Route path="/register" element={<RegistrationForm />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/confirm-email/:token" element={<ConfirmMail />} />
+                <Route
+                  path="/reset-password/:token"
+                  element={<ResetPassword />}
+                />
               </Route>
               <Route path="*" element={<Navigate to="/login" replace />} />
             </>
@@ -56,7 +60,6 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}
-
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
 

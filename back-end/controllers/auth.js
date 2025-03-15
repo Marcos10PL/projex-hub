@@ -29,10 +29,10 @@ const login = async (req, res) => {
     $or: [{ email: login }, { username: login }],
   });
 
-  if (!user) throw new UnauthenticatedError("Invalid credentials");
+  if (!user) throw new UnauthenticatedError("Invalid login");
 
   const isMatch = await user.matchPassword(password);
-  if (!isMatch) throw new UnauthenticatedError("Invalid credentials");
+  if (!isMatch) throw new UnauthenticatedError("Invalid password");
 
   const token = user.createJWT();
 
@@ -49,10 +49,13 @@ const register = async (req, res) => {
   const { email, password, username } = req.body;
 
   if (!email || !password || !username)
-    throw new NotFoundError("Please provide all fields");
+    throw new BadRequestError("Please provide all fields");
 
-  const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-  if (existingUser) throw new BadRequestError("User already exists");
+  let existingUser = await User.findOne({ email });
+  if (existingUser) throw new BadRequestError("Email already in use");
+
+  existingUser = await User.findOne({ username });
+  if (existingUser) throw new BadRequestError("Username already in use");
 
   if (!password.match(passwordRegex)) {
     throw new BadRequestError(
@@ -78,9 +81,7 @@ const register = async (req, res) => {
       .json({ success: true, msg: "User created (not verified - email sent)" });
   } catch (error) {
     console.log(error);
-    throw new BadRequestError(
-      "Sorry, something went wrong (email could not be sent)"
-    );
+    throw new BadRequestError("Email could not be sent");
   }
 };
 
@@ -115,7 +116,7 @@ const confirmEmail = async (req, res) => {
   } catch (error) {
     if (error.name === "JsonWebTokenError")
       throw new BadRequestError("Invalid or malformed token");
-    
+
     throw error;
   }
 };
@@ -127,7 +128,7 @@ const resendEmail = async (req, res) => {
 
   const user = await User.findOne({ email });
 
-  if (!user) throw new NotFoundError("No user with that email");
+  if (!user) throw new NotFoundError("No user found");
 
   if (user.isActivated) throw new BadRequestError("Email already confirmed");
 
@@ -145,9 +146,7 @@ const resendEmail = async (req, res) => {
     res.status(StatusCodes.OK).json({ success: true, msg: "Email sent" });
   } catch (error) {
     console.log(error);
-    throw new BadRequestError(
-      "Sorry, something went wrong (email could not be sent)"
-    );
+    throw new BadRequestError("Email could not be sent");
   }
 };
 
@@ -158,7 +157,12 @@ const forgotPassword = async (req, res) => {
 
   const user = await User.findOne({ email });
 
-  if (!user) throw new NotFoundError("No user with that email");
+  if (!user) throw new NotFoundError("No user found");
+
+  if (!user.isActivated) throw new BadRequestError("Email not confirmed");
+
+  user.isResetPassTokenExpired = false;
+  await user.save();
 
   const token = user.createEmailJWT();
 
@@ -174,9 +178,7 @@ const forgotPassword = async (req, res) => {
     res.status(StatusCodes.OK).json({ success: true, msg: "Email sent" });
   } catch (error) {
     console.log(error);
-    throw new BadRequestError(
-      "Sorry, something went wrong (email could not be sent)"
-    );
+    throw new BadRequestError("Email could not be sent");
   }
 };
 
@@ -192,6 +194,11 @@ const resetPassword = async (req, res) => {
 
     if (!user) throw new NotFoundError("No user found");
 
+    if (!user.isActivated) throw new BadRequestError("Email not confirmed");
+
+    if (user.isResetPassTokenExpired)
+      throw new BadRequestError("Token already used");
+
     if (!password.match(passwordRegex)) {
       throw new BadRequestError(
         "Password must be at least 8 characters long and contain an uppercase letter and a digit"
@@ -199,6 +206,7 @@ const resetPassword = async (req, res) => {
     }
 
     user.password = password;
+    user.isResetPassTokenExpired = true;
     await user.save();
 
     res.status(StatusCodes.OK).json({ success: true, msg: "Password reset" });

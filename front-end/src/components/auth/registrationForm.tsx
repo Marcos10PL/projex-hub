@@ -2,15 +2,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, NavLink } from "react-router-dom";
 import API from "../../lib/axiosConfig";
-import { Register, registerSchema } from "../../lib/zodSchemas";
+import {
+  apiResponseSchema,
+  RegisterForm,
+  RegisterResponse,
+  registerResponseSchema,
+  registerSchema,
+} from "../../lib/zodSchemas";
 import { useState } from "react";
 import ErrorMsg from "./ErrorMsg";
 import clsx from "clsx";
 import Spinner from "../Spinner";
+import { AxiosError } from "axios";
 
 export default function RegistrationForm() {
   const [errorMsg, setErrorMsg] = useState("");
-  const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,20 +27,30 @@ export default function RegistrationForm() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(registerSchema) });
 
-  const onSubmit: SubmitHandler<Register> = async data => {
+  const onSubmit: SubmitHandler<RegisterForm> = async data => {
     try {
       setErrorMsg("");
       setLoading(true);
-      const res = await API.post("api/auth/register", data);
-      if (res.data.success) {
-        setSuccess(true);
+
+      const res = await API.post("auth/register", data);
+      const dataRes = registerResponseSchema.safeParse(res.data);
+
+      if (dataRes.data?.success) {
         setEmail(data.email);
       }
-      setErrorMsg("Invalid username, password or email");
-      // eslint-disable-next-line
-    } catch (err) {
-      // console.error(err);
-      setErrorMsg("Sorry, something went wrong");
+    } catch (err: unknown) {
+      const { response } = err as AxiosError<RegisterResponse>;
+
+      if (response) {
+        if (response.status >= 500)
+          setErrorMsg("Server error. Please try again later.");
+        if (response.status === 400)
+          setErrorMsg(response.data.msg || "Invalid data");
+        if (response.status === 429) 
+          setMessage(response.data.msg + '.' || "Too many requests.");
+      } else {
+        setErrorMsg("Something went wrong. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -42,19 +58,17 @@ export default function RegistrationForm() {
 
   const resendEmail = async () => {
     try {
-      const res = await API.post("api/auth/resend-confirm-email", { email });
-      if (!res.data.success) {
-        setMessage(
-          "Something went wrong. Maybe you have already confirmed your email?"
-        );
-        throw new Error("Something went wrong");
+      const res = await API.post("auth/resend-confirm-email", { email });
+      const dataRes = apiResponseSchema.safeParse(res.data);
+
+      if (dataRes.data?.success) {
+        setMessage("Email has been sent.");
       }
-      setMessage("Email has been sent");
-      // eslint-disable-next-line
+    // eslint-disable-next-line
     } catch (err) {
-      // console.error(err);
+      // console.log(err);
       setMessage(
-        "Sorry, but we couldn't send the email. <br /> Please try again later."
+        "Something went wrong. Maybe you have already confirmed your email?"
       );
     }
   };
@@ -73,7 +87,7 @@ export default function RegistrationForm() {
     );
   }
 
-  if (success) {
+  if (email) {
     return (
       <div className="text-center">
         <p className="px-3 pb-3">
@@ -97,66 +111,65 @@ export default function RegistrationForm() {
     );
   }
 
-  if (!success)
-    return (
-      <>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-5">
-            <input
-              type="email"
-              className="border-2 border-gray-500 rounded-lg outline-0 focus:border-2 focus:border-primary block w-full p-2.5 bg-gray-800"
-              placeholder="Email..."
-              {...register("email")}
-            />
-            <ErrorMsg message={errors.email?.message} />
-          </div>
-
-          <div className="mb-5">
-            <input
-              type="text"
-              className="border-2 border-gray-500 rounded-lg outline-0 focus:border-2 focus:border-primary block w-full p-2.5 bg-gray-800"
-              placeholder="Username..."
-              {...register("username")}
-            />
-            <ErrorMsg message={errors.username?.message} />
-          </div>
-
-          <div className="mb-5">
-            <input
-              type="password"
-              placeholder="Password..."
-              className="border-2 border-gray-500 rounded-lg outline-0 focus:border-primary block w-full p-2.5 bg-gray-800"
-              {...register("password")}
-            />
-            <ErrorMsg message={errors.password?.message} />
-          </div>
-
-          <div className="text-center my-3">
-            By registering you acknowledge that you have read and accept the{" "}
-            <Link to="/privacy-policy" className="link">
-              privacy policy
-            </Link>
-            , you can withdraw it at any time by deleting an account.
-          </div>
-
-          <button
-            type="submit"
-            className={clsx(
-              "button w-full my-3 h-11",
-              loading && "opacity-80 pointer-events-none"
-            )}
-          >
-            {loading ? <Spinner size={1.5} /> : "Register"}
-          </button>
-        </form>
-
-        <ErrorMsg message={errorMsg} />
-
-        <div className="my-3 flex flex-col items-center gap-2">
-          <NavLink to="/login" className="link">
-            Already have an account? Login now!
-          </NavLink>
+  return (
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mb-5">
+          <input
+            type="email"
+            className="border-2 border-gray-500 rounded-lg outline-0 focus:border-2 focus:border-primary block w-full p-2.5 bg-gray-800"
+            placeholder="Email..."
+            {...register("email")}
+          />
+          <ErrorMsg message={errors.email?.message} />
         </div>
-      </>
-    );
+
+        <div className="mb-5">
+          <input
+            type="text"
+            className="border-2 border-gray-500 rounded-lg outline-0 focus:border-2 focus:border-primary block w-full p-2.5 bg-gray-800"
+            placeholder="Username..."
+            {...register("username")}
+          />
+          <ErrorMsg message={errors.username?.message} />
+        </div>
+
+        <div className="mb-5">
+          <input
+            type="password"
+            placeholder="Password..."
+            className="border-2 border-gray-500 rounded-lg outline-0 focus:border-primary block w-full p-2.5 bg-gray-800"
+            {...register("password")}
+          />
+          <ErrorMsg message={errors.password?.message} />
+        </div>
+
+        <div className="text-center my-3">
+          By registering you acknowledge that you have read and accept the{" "}
+          <Link to="/privacy-policy" className="link">
+            privacy policy
+          </Link>
+          , you can withdraw it at any time by deleting an account.
+        </div>
+
+        <button
+          type="submit"
+          className={clsx(
+            "button w-full my-3 h-11",
+            loading && "opacity-80 pointer-events-none"
+          )}
+        >
+          {loading ? <Spinner size={1.5} /> : "Register"}
+        </button>
+      </form>
+
+      <ErrorMsg message={errorMsg} />
+
+      <div className="my-3 flex flex-col items-center gap-2">
+        <NavLink to="/login" className="link">
+          Already have an account? Login now!
+        </NavLink>
+      </div>
+    </>
+  );
 }

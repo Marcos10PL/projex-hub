@@ -4,13 +4,19 @@ import API from "../../lib/axiosConfig";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Login, loginSchema } from "../../lib/zodSchemas";
+import {
+  type LoginForm,
+  LoginResponse,
+  loginResponseSchema,
+  loginSchema,
+} from "../../lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorMsg from "./ErrorMsg";
 import Spinner from "../Spinner";
 import clsx from "clsx";
+import { AxiosError } from "axios";
 
-export default function LoginhtmlForm() {
+export default function LoginForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState("");
@@ -22,20 +28,32 @@ export default function LoginhtmlForm() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit: SubmitHandler<Login> = async data => {
+  const onSubmit: SubmitHandler<LoginForm> = async data => {
     try {
       setErrorMsg("");
       setLoading(true);
-      const res = await API.post("api/auth/login", data);
-      if (res.data.success) {
-        dispatch(setCurrentUser(res.data.user));
+
+      const res = await API.post("auth/login", data);
+      const dataRes = loginResponseSchema.safeParse(res.data);
+
+      if (dataRes.data?.success) {
+        dispatch(setCurrentUser(dataRes.data?.user));
         navigate("/");
       }
-      setErrorMsg("Invalid login or password");
-      // eslint-disable-next-line
-    } catch (err) {
-      // console.error(err);
-      setErrorMsg("Sorry, something went wrong");
+    } catch (err: unknown) {
+      const { response } = err as AxiosError<LoginResponse>;
+
+      if (response) {
+        if (response.status >= 500)
+          setErrorMsg("Server error. Please try again later.");
+        if (response.status === 401) 
+          setErrorMsg("Invalid login or password.");
+        if (response.status === 429) 
+          setErrorMsg(response.data.msg + '.' || "Too many requests.");
+        
+      } else {
+        setErrorMsg("Something went wrong. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +86,13 @@ export default function LoginhtmlForm() {
           </NavLink>
         </div>
 
-        <button type="submit" className={clsx("button w-full", loading && "pointer-events-none opacity-80")}>
+        <button
+          type="submit"
+          className={clsx(
+            "button w-full",
+            loading && "pointer-events-none opacity-80"
+          )}
+        >
           {loading ? <Spinner size={1.5} /> : "Login"}
         </button>
       </form>

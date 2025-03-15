@@ -9,7 +9,7 @@ export default function Logout() {
 
   const logout = async () => {
     try {
-      await API.post("/api/auth/logout");
+      await API.post("auth/logout");
       dispatch(clearCurrentUser());
       navigate("/login", { replace: true });
     } catch (error) {

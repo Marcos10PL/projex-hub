@@ -7,7 +7,7 @@ export default function AuthLayout() {
       <header className="text-center my-8 text-4xl">
         <Logo />
       </header>
-      <main className="max-w-sm mx-auto">
+      <main className="max-w-sm mx-auto px-4">
         <Outlet />
       </main>
     </>

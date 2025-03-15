@@ -16,6 +16,6 @@ const auth = async (req, res, next) => {
   } catch (error) {
     throw new UnauthenticatedError(error.message);
   }
-}
+};
 
 export default auth;

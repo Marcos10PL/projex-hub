@@ -6,22 +6,25 @@ import {
   checkAuth,
   resendEmail,
   confirmEmail,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/auth.js";
 import auth from "../middlewares/authentication.js";
+import authLimiter from "../middlewares/auth-limiter.js";
 
 const router = express.Router();
 
 router
-  .post("/register", register)
-  .post("/login", login)
+  .post("/register", authLimiter, register)
+  .post("/login", authLimiter, login)
   .post("/logout", logout)
 
   .get("/check", auth, checkAuth)
 
-  .post("/confirm-email", confirmEmail)
+  .post("/confirm-email", authLimiter, confirmEmail)
   .post("/resend-confirm-email", resendEmail)
 
-  // .post("/forgot-password", forgotPassword)
-  // .post("/reset-password", resetPassword);
+  .post("/forgot-password", authLimiter, forgotPassword)
+  .post("/reset-password", resetPassword);
 
 export default router;
