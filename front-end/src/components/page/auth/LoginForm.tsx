@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import API from "../../lib/axiosConfig";
+import API from "../../../lib/axiosConfig";
 import { useDispatch } from "react-redux";
-import { setCurrentUser } from "../../state/current-user/currentUserSlice";
+import { setCurrentUser } from "../../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   type LoginForm,
   LoginResponse,
   loginResponseSchema,
   loginSchema,
-} from "../../lib/zodSchemas";
+} from "../../../lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import ErrorMsg from "./ErrorMsg";
-import Spinner from "../Spinner";
+import Spinner from "../../Spinner";
 import clsx from "clsx";
 import { AxiosError } from "axios";
+import ErrorMsg from "../../auth/ErrorMsg";
 
 export default function LoginForm() {
   const dispatch = useDispatch();

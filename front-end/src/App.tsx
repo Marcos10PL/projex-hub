@@ -1,18 +1,19 @@
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppDispatch, RootState } from "./state/store";
-import LoginForm from "./components/auth/LoginForm";
-import RegistrationForm from "./components/auth/RegistrationForm";
 import Footer from "./components/Footer";
 import AuthLayout from "./components/layouts/AuthLayout";
 import PrivacyPolicy from "./components/PrivacyPolicy";
-import ForgotPassword from "./components/auth/ForgotPassword";
 import { useEffect } from "react";
 import { checkAuth } from "./state/current-user/currentUserSlice";
-import Logout from "./components/auth/Logout";
-import ConfirmMail from "./components/auth/ConfirmEmail";
+import ConfirmMail from "./components/page/auth/ConfirmEmail";
 import Spinner from "./components/Spinner";
-import ResetPassword from "./components/auth/ResetPassword";
+import ResetPassword from "./components/page/auth/ResetPassword";
+import RegistrationForm from "./components/page/auth/RegistrationForm";
+import ForgotPassword from "./components/page/auth/ForgotPassword";
+import LoginForm from "./components/page/auth/LoginForm";
+import AppLayout from "./components/layouts/AppLayout";
+
 
 export default function App() {
   const { isAuthenticated, loading } = useSelector(
@@ -37,7 +38,7 @@ export default function App() {
     return (
       <>
         <Routes>
-          {!isAuthenticated ? (
+          {isAuthenticated ? (
             <>
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<LoginForm />} />
@@ -53,9 +54,10 @@ export default function App() {
             </>
           ) : (
             <>
-              <Route element={<Outlet />}>
-                <Route path="/" element={<Logout />} />
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<div>HOME</div>} />
                 <Route path="/projects" element={<div>Projects</div>} />
+                <Route path="/profile" element={<div>Profile</div>} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </>

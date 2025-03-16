@@ -1,19 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, NavLink } from "react-router-dom";
-import API from "../../lib/axiosConfig";
+import API from "../../../lib/axiosConfig";
 import {
   apiResponseSchema,
   RegisterForm,
   RegisterResponse,
   registerResponseSchema,
   registerSchema,
-} from "../../lib/zodSchemas";
+} from "../../../lib/zodSchemas";
 import { useState } from "react";
-import ErrorMsg from "./ErrorMsg";
+
 import clsx from "clsx";
-import Spinner from "../Spinner";
+import Spinner from "../../Spinner";
 import { AxiosError } from "axios";
+import ErrorMsg from "../../auth/ErrorMsg";
 
 export default function RegistrationForm() {
   const [errorMsg, setErrorMsg] = useState("");

@@ -1,18 +1,18 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import Spinner from "../Spinner";
+import Spinner from "../../Spinner";
 import {
   ApiResponse,
   apiResponseSchema,
   ForgotPassowrdForm,
   forgotPasswordSchema,
-} from "../../lib/zodSchemas";
+} from "../../../lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import ErrorMsg from "./ErrorMsg";
-import API from "../../lib/axiosConfig";
+import API from "../../../lib/axiosConfig";
 import { AxiosError } from "axios";
+import ErrorMsg from "../../auth/ErrorMsg";
 
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);

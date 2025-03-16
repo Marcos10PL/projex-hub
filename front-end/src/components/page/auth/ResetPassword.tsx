@@ -1,15 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import {
-  apiResponseSchema,
-  ResetPasswordForm,
-  resetPasswordSchema,
-} from "../../lib/zodSchemas";
-import ErrorMsg from "./ErrorMsg";
-import API from "../../lib/axiosConfig";
 import { useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
-import Spinner from "../Spinner";
+import { apiResponseSchema, ResetPasswordForm, resetPasswordSchema } from "../../../lib/zodSchemas";
+import ErrorMsg from "../../auth/ErrorMsg";
+import Spinner from "../../Spinner";
+import API from "../../../lib/axiosConfig";
 
 export default function ResetPassword() {
   const { token } = useParams();
