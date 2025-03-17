@@ -41,7 +41,11 @@ const login = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     msg: "User logged in",
-    user: { email: user.email, username: user.username },
+    user: {
+      email: user.email,
+      username: user.username,
+      isActivated: user.isActivated,
+    },
   });
 };
 
@@ -122,31 +126,14 @@ const confirmEmail = async (req, res) => {
 };
 
 const resendEmail = async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) throw new BadRequestError("Please provide an email");
-
-  const user = await User.findOne({ email });
-
-  if (!user) throw new NotFoundError("No user found");
-
-  if (user.isActivated) throw new BadRequestError("Email already confirmed");
-
-  const emailToken = user.createEmailJWT();
-
-  const emailOptions = {
-    to: user.email,
-    from: process.env.EMAIL,
-    subject: confirmEmailOptions.subject,
-    html: confirmEmailOptions.html(emailToken),
-  };
-
   try {
-    await sgMail.send(emailOptions);
-    res.status(StatusCodes.OK).json({ success: true, msg: "Email sent" });
+    const { email } = req.body;
+    if (!email) throw new BadRequestError("Please provide an email");
+
+    const response = await sendConfirmationEmail(email);
+    res.status(StatusCodes.OK).json(response);
   } catch (error) {
-    console.log(error);
-    throw new BadRequestError("Email could not be sent");
+    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
   }
 };
 
@@ -218,6 +205,100 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const { email, username, newPassword, password } = req.body;
+
+  if (!email && !username && !newPassword)
+    throw new BadRequestError("Please at least provide one field to update");
+
+  if (!password)
+    throw new BadRequestError("Please provide your current password");
+
+  const user = await User.findOne({ email: req.user.email });
+
+  if (!user) throw new NotFoundError("No user found");
+
+  if (!user.isActivated)
+    throw new BadRequestError("Your email is not confirmed");
+
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) throw new UnauthenticatedError("Invalid password");
+
+  let state = false;
+  let isEmailChanged = false;
+
+  if (email && email !== user.email) {
+    user.email = email;
+    user.isActivated = false;
+    state = true;
+    isEmailChanged = true;
+  }
+
+  if (username && username !== user.username) {
+    user.username = username;
+    state = true;
+  }
+
+  if (newPassword && !(await user.matchPassword(newPassword))) {
+    if (!newPassword.match(passwordRegex)) {
+      throw new BadRequestError(
+        "Password must be at least 8 characters long and contain an uppercase letter and a digit"
+      );
+    }
+    user.password = newPassword;
+    state = true;
+  }
+
+  if (!state) throw new BadRequestError("No changes made");
+
+  await user.save();
+
+  let msg = "";
+  if (isEmailChanged) {
+    try {
+      const res = await sendConfirmationEmail(email);
+      if (res.success) msg = " (email sent)";
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    msg: "User updated" + msg,
+    user: {
+      email: user.email,
+      username: user.username,
+      isActivated: user.isActivated,
+    },
+  });
+};
+
+const sendConfirmationEmail = async email => {
+  const user = await User.findOne({ email });
+
+  if (!user) throw new Error("No user found");
+
+  if (user.isActivated) throw new Error("Email already confirmed");
+
+  const emailToken = user.createEmailJWT();
+
+  const emailOptions = {
+    to: user.email,
+    from: process.env.EMAIL,
+    subject: confirmEmailOptions.subject,
+    html: confirmEmailOptions.html(emailToken),
+  };
+
+  try {
+    await sgMail.send(emailOptions);
+    return { success: true, msg: "Email sent" };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Email could not be sent");
+  }
+};
+
 export {
   login,
   register,
@@ -227,4 +308,5 @@ export {
   confirmEmail,
   forgotPassword,
   resetPassword,
+  updateUser,
 };

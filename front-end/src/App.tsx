@@ -3,17 +3,18 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppDispatch, RootState } from "./state/store";
 import Footer from "./components/Footer";
 import AuthLayout from "./components/layouts/AuthLayout";
-import PrivacyPolicy from "./components/PrivacyPolicy";
 import { useEffect } from "react";
 import { checkAuth } from "./state/current-user/currentUserSlice";
-import ConfirmMail from "./components/page/auth/ConfirmEmail";
+import ConfirmMail from "./components/pages/ConfirmEmail";
 import Spinner from "./components/Spinner";
-import ResetPassword from "./components/page/auth/ResetPassword";
-import RegistrationForm from "./components/page/auth/RegistrationForm";
-import ForgotPassword from "./components/page/auth/ForgotPassword";
-import LoginForm from "./components/page/auth/LoginForm";
+import ResetPassword from "./components/pages/auth/ResetPassword";
+import RegistrationForm from "./components/pages/auth/RegistrationForm";
+import ForgotPassword from "./components/pages/auth/ForgotPassword";
+import LoginForm from "./components/pages/auth/LoginForm";
 import AppLayout from "./components/layouts/AppLayout";
-
+import HomeLayout from "./components/layouts/HomeLyout";
+import PrivacyPolicy from "./components/pages/PrivacyPolicy";
+import Profile from "./components/pages/app/Profile";
 
 export default function App() {
   const { isAuthenticated, loading } = useSelector(
@@ -38,13 +39,12 @@ export default function App() {
     return (
       <>
         <Routes>
-          {isAuthenticated ? (
+          {!isAuthenticated ? (
             <>
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/register" element={<RegistrationForm />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/confirm-email/:token" element={<ConfirmMail />} />
                 <Route
                   path="/reset-password/:token"
                   element={<ResetPassword />}
@@ -57,12 +57,17 @@ export default function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<div>HOME</div>} />
                 <Route path="/projects" element={<div>Projects</div>} />
-                <Route path="/profile" element={<div>Profile</div>} />
+                <Route path="/profile" element={<Profile />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+          <Route element={<HomeLayout />}>
+            <Route path="/confirm-email/:token" element={<ConfirmMail />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          </Route>
+          
         </Routes>
 
         <Footer />

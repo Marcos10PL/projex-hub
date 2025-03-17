@@ -8,6 +8,7 @@ import {
   confirmEmail,
   forgotPassword,
   resetPassword,
+  updateUser,
 } from "../controllers/auth.js";
 import auth from "../middlewares/authentication.js";
 import authLimiter from "../middlewares/auth-limiter.js";
@@ -18,7 +19,8 @@ router
   .post("/register", authLimiter, register)
   .post("/login", authLimiter, login)
   .post("/logout", logout)
-
+  
+  .post("/update", auth, authLimiter, updateUser)
   .get("/check", auth, checkAuth)
 
   .post("/confirm-email", authLimiter, confirmEmail)

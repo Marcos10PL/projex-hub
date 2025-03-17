@@ -3,18 +3,18 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, NavLink } from "react-router-dom";
 import API from "../../../lib/axiosConfig";
 import {
-  apiResponseSchema,
   RegisterForm,
   RegisterResponse,
   registerResponseSchema,
   registerSchema,
 } from "../../../lib/zodSchemas";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import clsx from "clsx";
 import Spinner from "../../Spinner";
 import { AxiosError } from "axios";
 import ErrorMsg from "../../auth/ErrorMsg";
+import { resendEmail } from "../../../lib/utils";
 
 export default function RegistrationForm() {
   const [errorMsg, setErrorMsg] = useState("");
@@ -47,8 +47,8 @@ export default function RegistrationForm() {
           setErrorMsg("Server error. Please try again later.");
         if (response.status === 400)
           setErrorMsg(response.data.msg || "Invalid data");
-        if (response.status === 429) 
-          setMessage(response.data.msg + '.' || "Too many requests.");
+        if (response.status === 429)
+          setErrorMsg(response.data.msg + "." || "Too many requests.");
       } else {
         setErrorMsg("Something went wrong. Please try again later.");
       }
@@ -57,22 +57,11 @@ export default function RegistrationForm() {
     }
   };
 
-  const resendEmail = async () => {
-    try {
-      const res = await API.post("auth/resend-confirm-email", { email });
-      const dataRes = apiResponseSchema.safeParse(res.data);
-
-      if (dataRes.data?.success) {
-        setMessage("Email has been sent.");
-      }
-    // eslint-disable-next-line
-    } catch (err) {
-      // console.log(err);
-      setMessage(
-        "Something went wrong. Maybe you have already confirmed your email?"
-      );
-    }
-  };
+  const handleResendEmail = useCallback(async () => {
+    const res = await resendEmail(email);
+    if (res) setMessage("Email has been sent.");
+    else setMessage("Something went wrong. Please try again later.");
+  }, [email]);
 
   if (message) {
     return (
@@ -97,7 +86,7 @@ export default function RegistrationForm() {
         </p>
         <p className="px-3 pb-3">
           If you don't see the email, check the spam folder or click{" "}
-          <button className="link cursor-pointer" onClick={resendEmail}>
+          <button className="link cursor-pointer" onClick={handleResendEmail}>
             resend the email.
           </button>
         </p>

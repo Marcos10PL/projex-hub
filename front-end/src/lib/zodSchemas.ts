@@ -21,6 +21,7 @@ export const userSchema = z.object({
       /^(?=.*[A-Z])(?=.*\d).{8,}$/,
       "Password must contain at least one uppercase letter and one number"
     ),
+  isActivated: z.boolean(),
 });
 
 // eslint-disable-next-line
@@ -44,10 +45,18 @@ export const resetPasswordSchema = z.object({
   password: userSchema.shape.password,
 });
 
+export const updateProfileSchema = z.object({
+  email: z.union([userSchema.shape.email, z.literal("").optional()]),
+  username: z.union([userSchema.shape.username, z.literal("").optional()]),
+  newPassword: z.union([userSchema.shape.password, z.literal("").optional()]),
+  password: userSchema.shape.password,
+});
+
 export type ForgotPassowrdForm = z.infer<typeof forgotPasswordSchema>;
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
 export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
+export type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 
 //----------- api response ---------- //
 
@@ -62,6 +71,11 @@ export const loginResponseSchema = apiResponseSchema.merge(
 
 export const registerResponseSchema = apiResponseSchema;
 
+export const updateProfileResponseSchema = apiResponseSchema.merge(
+  z.object({ user: userSchema.omit({ password: true }) })
+);
+
 export type ApiResponse = z.infer<typeof apiResponseSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
+export type UpdateProfileResponse = z.infer<typeof updateProfileResponseSchema>;

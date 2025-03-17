@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
-import Nav from "../app/Nav";
+import Logo from "../Logo";
 
-export default function AppLayout() {
+export default function HomeLayout() {
   return (
     <>
-      <header>
-        <Nav />
+      <header className="text-center my-8 text-4xl">
+        <Logo />
       </header>
       <main className="md:w-2/3 mx-auto px-4">
         <Outlet />

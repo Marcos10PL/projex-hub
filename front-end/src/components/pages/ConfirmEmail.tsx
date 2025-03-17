@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { NavLink, useParams } from "react-router-dom";
-import API from "../../../lib/axiosConfig";
-import Spinner from "../../Spinner";
-import { apiResponseSchema } from "../../../lib/zodSchemas";
+import { useParams } from "react-router-dom";
+import API from "../../lib/axiosConfig";
+import Spinner from "../Spinner";
+import { apiResponseSchema } from "../../lib/zodSchemas";
 
 export default function ConfirmEmail() {
   const { token } = useParams();
@@ -17,7 +17,7 @@ export default function ConfirmEmail() {
         const dataRes = apiResponseSchema.safeParse(res.data);
 
         if (dataRes.data?.success) {
-          setMessage("Email has been confirmed.");
+          setMessage("Email has been confirmed. You can leave this page.");
         }
         // eslint-disable-next-line
       } catch (err) {
@@ -34,13 +34,8 @@ export default function ConfirmEmail() {
   }, [token]);
 
   return (
-    <div className="text-center">
-      <div className="px-3 pb-6">
-        {!loading ? <p>{message}</p> : <Spinner size={2} />}
-      </div>
-      <NavLink to="/login" className="link">
-        Back to login
-      </NavLink>
+    <div className="text-center max-w-sm mx-auto px-3 pb-6">
+      {!loading ? <p>{message}</p> : <Spinner size={2} />}
     </div>
   );
 }
