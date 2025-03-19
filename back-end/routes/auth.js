@@ -20,7 +20,7 @@ router
   .post("/login", authLimiter, login)
   .post("/logout", logout)
   
-  .post("/update", auth, authLimiter, updateUser)
+  .patch("/update", auth, authLimiter, updateUser)
   .get("/check", auth, checkAuth)
 
   .post("/confirm-email", authLimiter, confirmEmail)

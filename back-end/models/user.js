@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       "Please provide a valid email",
     ],
+    trim: true,
   },
   username: {
     type: String,
@@ -25,6 +26,7 @@ const userSchema = new mongoose.Schema({
       /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/,
       "Username can only contain letters, numbers, underscores and dashes",
     ],
+    trim: true,
   },
   password: {
     type: String, 

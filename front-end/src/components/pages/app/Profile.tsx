@@ -36,7 +36,7 @@ export default function Profile() {
       setSuccess(false);
       setLoading(true);
 
-      const res = await API.post("auth/update", data);
+      const res = await API.patch("auth/update", data);
       const dataRes = updateProfileResponseSchema.safeParse(res.data);
 
       if (dataRes.data?.success) {
