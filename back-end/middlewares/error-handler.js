@@ -14,9 +14,11 @@ const errorHandler = (err, req, res, next) => {
   };
 
   if (err.name === "ValidationError") {
-    customError.msg = Object.values(err.errors)
-      .map(item => item.message)
-      .join(", ");
+    customError.msg =
+      "Validation failed on: " +
+      Object.values(err.errors)
+        .map(item => item.path)
+        .join(", ");
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
@@ -25,9 +27,9 @@ const errorHandler = (err, req, res, next) => {
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
-  if (err.name === 'CastError') {
-    customError.msg = `No item found with id : ${err.value}`
-    customError.statusCode = StatusCodes.NOT_FOUND
+  if (err.name === "CastError") {
+    customError.msg = "Invalid value provided";
+    customError.statusCode = StatusCodes.NOT_FOUND;
   }
 
   if (err.code === 11000) {
@@ -37,7 +39,7 @@ const errorHandler = (err, req, res, next) => {
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
-  console.log(err.name);
+  // console.log(err);
 
   return res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)

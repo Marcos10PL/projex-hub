@@ -133,7 +133,8 @@ const resendEmail = async (req, res) => {
     const response = await sendConfirmationEmail(email);
     res.status(StatusCodes.OK).json(response);
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    console.log(error);
+    throw new BadRequestError("Email could not be sent");
   }
 };
 
@@ -259,7 +260,8 @@ const updateUser = async (req, res) => {
       const res = await sendConfirmationEmail(email);
       if (res.success) msg = " (email sent)";
     } catch (error) {
-      throw error;
+      console.log(error);
+      throw new BadRequestError("Email could not be sent");
     }
   }
 

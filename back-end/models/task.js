@@ -15,27 +15,22 @@ const taskSchema = new mongoose.Schema(
       min: 3,
       trim: true,
     },
-    project: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
-      required: true,
-    },
-    assignees: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
     status: {
       type: String,
-      enum: ["todo", "in-progress", "done"],
-      default: "todo",
+      enum: ["to-do", "in-progress", "done"],
+      default: "to-do",
     },
-    dueDate: Date, 
-    completedAt: Date, 
+    dueDate: Date,
+    completedAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
+
+taskSchema.pre("save", async function () {
+  if (this.isModified("status") && this.status === "done") {
+    this.completedAt = Date.now();
+  } else this.completedAt = null;
+});
 
 const Task = mongoose.model("Task", taskSchema);
 

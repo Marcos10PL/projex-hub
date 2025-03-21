@@ -40,11 +40,11 @@ const projectSchema = new mongoose.Schema(
     dueDate: Date,
     completedAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 projectSchema.post("findOne", async doc => {
-  await populateMembers(doc);
+  if (doc) await populateMembers(doc);
 });
 
 projectSchema.post("find", async docs => {
@@ -54,13 +54,14 @@ projectSchema.post("find", async docs => {
 });
 
 projectSchema.post("save", async doc => {
-  await populateMembers(doc);
+  if (doc) await populateMembers(doc);
 });
 
-async function populateMembers(doc) {
-  await doc.populate("owner", "_id username email");
-  await doc.populate("members", "_id username email");
-}
+const populateMembers = async doc => {
+  await doc.populate("owner", "_id username");
+  await doc.populate("members", "_id username");
+  await doc.populate("tasks");
+};
 
 const Project = mongoose.model("Project", projectSchema);
 

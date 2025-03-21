@@ -6,9 +6,10 @@ import {
   updateProject,
   deleteProject,
   addMember,
-  removeMember,
-  addTask,
-  removeTask,
+  deleteMember,
+  createTask,
+  deleteTask,
+  updateTask,
 } from "../controllers/projects.js";
 
 const router = express.Router();
@@ -22,12 +23,19 @@ router.route("/:id")
   .patch(updateProject)
   .delete(deleteProject);
 
+
 router.route("/:id/members")
   .post(addMember)
-  .delete(removeMember);
+
+router.route("/:id/members/:memberId")
+  .delete(deleteMember);
+
 
 router.route("/:id/tasks")
-  .post(addTask)
-  .delete(removeTask);
+  .post(createTask)
+
+router.route("/:id/tasks/:taskId")
+  .patch(updateTask)
+  .delete(deleteTask);
 
 export default router;
