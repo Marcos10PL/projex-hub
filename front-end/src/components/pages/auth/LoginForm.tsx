@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import API from "../../../lib/axiosConfig";
+import API from "../../../utils/axiosConfig";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "../../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -9,7 +9,7 @@ import {
   LoginResponse,
   loginResponseSchema,
   loginSchema,
-} from "../../../lib/zodSchemas";
+} from "../../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Spinner from "../../Spinner";
 import clsx from "clsx";

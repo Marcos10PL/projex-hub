@@ -4,17 +4,17 @@ import {
   UpdateProfileResponse,
   updateProfileResponseSchema,
   updateProfileSchema,
-} from "../../../lib/zodSchemas";
+} from "../../../utils/zodSchemas";
 import ErrorMsg from "../../auth/ErrorMsg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
-import API from "../../../lib/axiosConfig";
+import API from "../../../utils/axiosConfig";
 import { AxiosError } from "axios";
 import { useCallback, useState } from "react";
 import Spinner from "../../Spinner";
-import { resendEmail } from "../../../lib/utils";
+import { resendEmail } from "../../../utils/utils";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);

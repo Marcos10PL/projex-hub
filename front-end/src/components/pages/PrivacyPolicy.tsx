@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import privacyPolicy from "../../lib/privacyPolicy";
+import privacyPolicy from "../../utils/privacyPolicy";
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();

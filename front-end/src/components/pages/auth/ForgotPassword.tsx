@@ -7,10 +7,10 @@ import {
   apiResponseSchema,
   ForgotPassowrdForm,
   forgotPasswordSchema,
-} from "../../../lib/zodSchemas";
+} from "../../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import API from "../../../lib/axiosConfig";
+import API from "../../../utils/axiosConfig";
 import { AxiosError } from "axios";
 import ErrorMsg from "../../auth/ErrorMsg";
 

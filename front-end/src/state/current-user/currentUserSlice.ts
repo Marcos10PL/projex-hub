@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import API from "../../lib/axiosConfig";
-import { User } from "../../lib/zodSchemas";
+import API from "../../utils/axiosConfig";
+import { User } from "../../utils/zodSchemas";
 
 type CurrentUserState = {
   currentUser: User | null;

@@ -1,4 +1,4 @@
-import API from "../../lib/axiosConfig";
+import API from "../../utils/axiosConfig";
 import { clearCurrentUser } from "../../state/current-user/currentUserSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";

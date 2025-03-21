@@ -27,8 +27,10 @@ const taskSchema = new mongoose.Schema(
 );
 
 taskSchema.pre("save", async function () {
-  if (this.isModified("status") && this.status === "done") {
-    this.completedAt = Date.now();
+  if (!this.isModified("status")) return;
+
+  if (this.status === "done") {
+    this.completedAt = new Date();
   } else this.completedAt = null;
 });
 

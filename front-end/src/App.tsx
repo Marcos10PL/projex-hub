@@ -15,6 +15,9 @@ import AppLayout from "./components/layouts/AppLayout";
 import HomeLayout from "./components/layouts/HomeLyout";
 import PrivacyPolicy from "./components/pages/PrivacyPolicy";
 import Profile from "./components/pages/app/Profile";
+import Home from "./components/pages/app/Home";
+import Projects from "./components/pages/app/Projects";
+import ProjectDetails from "./components/pages/app/ProjectDetails";
 
 export default function App() {
   const { isAuthenticated, loading } = useSelector(
@@ -55,8 +58,11 @@ export default function App() {
           ) : (
             <>
               <Route element={<AppLayout />}>
-                <Route path="/" element={<div>HOME</div>} />
-                <Route path="/projects" element={<div>Projects</div>} />
+                <Route path="/" element={<Home />} />
+                <Route path="/projects">
+                  <Route index element={<Projects />} />
+                  <Route path=":id" element={<ProjectDetails />} />
+                </Route>
                 <Route path="/profile" element={<Profile />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -67,7 +73,6 @@ export default function App() {
             <Route path="/confirm-email/:token" element={<ConfirmMail />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Route>
-          
         </Routes>
 
         <Footer />
