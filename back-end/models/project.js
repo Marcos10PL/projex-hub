@@ -44,7 +44,7 @@ const projectSchema = new mongoose.Schema(
 );
 
 projectSchema.pre("save", async function () {
-  if(!this.isModified("status")) return;
+  if (!this.isModified("status")) return;
 
   if (this.status === "completed") {
     this.completedAt = new Date();

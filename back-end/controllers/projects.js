@@ -7,18 +7,125 @@ import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
 
 const getAllProjects = async (req, res) => {
-  const query = req.query;
+  const { status, search, sort, order, dueDate, dueDateAfter, dueDateBefore } =
+    req.query;
+
   const userId = req.user._id;
 
-  const projects = await Project.find({
+  const query = {
     $or: [{ owner: userId }, { members: userId }],
-  });
+  };
+
+  if (status) query.status = status;
+  if (search) query.name = { $regex: search, $options: "i" };
+
+  let result = Project.find(query);
+
+  if (sort === "latest") result = result.sort({ createdAt: -1 });
+  if (sort === "oldest") result = result.sort({ createdAt: 1 });
+
+  if (sort === "dueDateAsc") result = result.sort({ dueDate: 1 });
+  if (sort === "dueDateDesc") result = result.sort({ dueDate: -1 });
+
+  if (sort) {
+    const orderType = order === "asc" ? 1 : -1;
+    const sortQuery = { [sort]: orderType };
+    result = result.sort(sortQuery);
+  }
+
+  if (dueDate === "today") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    result = result.where("dueDate").gte(today).lt(tomorrow);
+  }
+
+  if (dueDate === "thisWeek") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    result = result.where("dueDate").gte(today).lt(nextWeek);
+  }
+
+  if (dueDate === "nextWeek") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    const nextNextWeek = new Date(nextWeek);
+    nextNextWeek.setDate(nextNextWeek.getDate() + 7);
+
+    result = result.where("dueDate").gte(nextWeek).lt(nextNextWeek);
+  }
+
+  if (dueDate === "thisMonth") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+    result = result.where("dueDate").gte(today).lt(nextMonth);
+  }
+
+  if (dueDate === "nextMonth") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const nextNextMonth = new Date(nextMonth);
+    nextNextMonth.setMonth(nextNextMonth.getMonth() + 1);
+
+    result = result.where("dueDate").gte(nextMonth).lt(nextNextMonth);
+  }
+
+  if (dueDate === "noDueDate") {
+    result = result.where("dueDate").exists(false);
+  }
+
+  if (dueDate === "overdue") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    result = result.where("dueDate").lt(today);
+  }
+
+  if (dueDateAfter) {
+    const date = new Date(dueDateAfter);
+    date.setHours(0, 0, 0, 0);
+
+    result = result.where("dueDate").gte(date);
+  }
+
+  if (dueDateBefore) {
+    const date = new Date(dueDateBefore);
+    date.setHours(0, 0, 0, 0);
+
+    result = result.where("dueDate").lt(date);
+  }
+
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  result = result.skip(skip).limit(limit);
+
+  const projects = await result;
+
+  const totalProjects = await Project.countDocuments(query);
+  const totalPages = Math.ceil(totalProjects / limit);
 
   res.status(StatusCodes.OK).json({
     success: true,
     msg: projects.length
       ? "Projects fetched successfully"
       : "No projects found",
+    currentPage: page,
+    totalPages,
+    totalProjects,
     projects,
   });
 };
