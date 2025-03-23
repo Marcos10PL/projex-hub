@@ -3,21 +3,27 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import Spinner from "../../Spinner";
 import {
-  ApiResponse,
   apiResponseSchema,
   ForgotPassowrdForm,
   forgotPasswordSchema,
 } from "../../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import API from "../../../utils/axiosConfig";
-import { AxiosError } from "axios";
 import ErrorMsg from "../../auth/ErrorMsg";
+import useApi from "../../../utils/myHooks/useApi";
 
 export default function ForgotPassword() {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const { loading, errorMsg, fetchData } = useApi(
+    "auth/forgot-password",
+    apiResponseSchema,
+    "post",
+    {
+      400: "Your address is not verified. <br /> Please login and verify your email address.",
+      404: "No user found with this email address.",
+    }
+  );
 
   const {
     handleSubmit,
@@ -26,53 +32,20 @@ export default function ForgotPassword() {
   } = useForm({ resolver: zodResolver(forgotPasswordSchema) });
 
   const onSubmit: SubmitHandler<ForgotPassowrdForm> = async data => {
-    try {
-      setLoading(true);
-      setMessage("");
+    const res = await fetchData({ data });
 
-      const res = await API.post("auth/forgot-password", data);
-      const dataRes = apiResponseSchema.safeParse(res.data);
-
-      if (dataRes.data?.success) {
-        setMessage(
-          "Reset link sent successfully! <br /> You can close this page."
-        );
-        setSuccess(true);
-      }
-    } catch (err) {
-      const { response } = err as AxiosError<ApiResponse>;
-
-      if (response) {
-        if (response.status >= 500)
-          setMessage("Server error. <br /> Please try again later.");
-        if (response.status === 404)
-          setMessage("No user found with this email address.");
-        if (response.status === 429)
-          setMessage(response.data.msg + "." || "Too many requests.");
-        if (response.status === 400)
-          setMessage(
-            "Your address is not verified. <br /> Please login and verify your email address."
-          );
-      } else {
-        setMessage("Something went wrong. <br /> Please try again later.");
-      }
-    } finally {
-      setLoading(false);
+    if (res?.success) {
+      setSuccess(true);
     }
   };
 
   return (
     <>
-      {message ? (
+      {success ? (
         <div className="text-center">
           <div className="px-3 pb-6">
-            <p dangerouslySetInnerHTML={{ __html: message }} />
+            Reset link sent successfully! <br /> You can close this page.
           </div>
-          {!success && (
-            <button className="button w-full" onClick={() => setMessage("")}>
-              Try again
-            </button>
-          )}
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -102,6 +75,7 @@ export default function ForgotPassword() {
               password.
             </label>
           </div>
+          <ErrorMsg message={errorMsg} />
         </form>
       )}
 

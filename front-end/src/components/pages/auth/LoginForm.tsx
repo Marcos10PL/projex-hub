@@ -1,26 +1,28 @@
-import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import API from "../../../utils/axiosConfig";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "../../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   type LoginForm,
-  LoginResponse,
   loginResponseSchema,
   loginSchema,
 } from "../../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Spinner from "../../Spinner";
 import clsx from "clsx";
-import { AxiosError } from "axios";
 import ErrorMsg from "../../auth/ErrorMsg";
+import useApi from "../../../utils/myHooks/useApi.ts";
 
 export default function LoginForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [errorMsg, setErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const { loading, errorMsg, fetchData } = useApi(
+    "auth/login",
+    loginResponseSchema,
+    "post",
+    { 401: "Invalid login or password." }
+  );
 
   const {
     handleSubmit,
@@ -29,33 +31,11 @@ export default function LoginForm() {
   } = useForm({ resolver: zodResolver(loginSchema) });
 
   const onSubmit: SubmitHandler<LoginForm> = async data => {
-    try {
-      setErrorMsg("");
-      setLoading(true);
+    const res = await fetchData({ data });
 
-      const res = await API.post("auth/login", data);
-      const dataRes = loginResponseSchema.safeParse(res.data);
-
-      if (dataRes.data?.success) {
-        dispatch(setCurrentUser(dataRes.data?.user));
-        navigate("/");
-      }
-    } catch (err: unknown) {
-      const { response } = err as AxiosError<LoginResponse>;
-
-      if (response) {
-        if (response.status >= 500)
-          setErrorMsg("Server error. Please try again later.");
-        if (response.status === 401) 
-          setErrorMsg("Invalid login or password.");
-        if (response.status === 429) 
-          setErrorMsg(response.data.msg + '.' || "Too many requests.");
-        
-      } else {
-        setErrorMsg("Something went wrong. Please try again later.");
-      }
-    } finally {
-      setLoading(false);
+    if (res?.success) {
+      dispatch(setCurrentUser(res.user));
+      navigate("/");
     }
   };
 

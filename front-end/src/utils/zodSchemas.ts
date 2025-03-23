@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 //----------- types ---------- //
-export const userSchema = z.object({
+const user = z.object({
+  _id: z.string(),
   email: z
     .string()
     .min(6, "Email must be at least 6 characters long")
@@ -14,19 +15,35 @@ export const userSchema = z.object({
       /^[a-zA-Z0-9_]*$/,
       "Username can only contain letters, numbers and underscores"
     ),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(
-      /^(?=.*[A-Z])(?=.*\d).{8,}$/,
-      "Password must contain at least one uppercase letter and one number"
-    ),
   isActivated: z.boolean(),
 });
 
-// eslint-disable-next-line
-const userSchemaWithoutPassword = userSchema.omit({ password: true });
-export type User = z.infer<typeof userSchemaWithoutPassword>;
+export const userSchema = user.merge(
+  z.object({
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(
+        /^(?=.*[A-Z])(?=.*\d).{8,}$/,
+        "Password must contain at least one uppercase letter and one number"
+      ),
+  })
+);
+
+export const projectSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  owner: user.omit({ isActivated: true, email: true }),
+  members: z.array(user.omit({ isActivated: true, email: true })),
+  status: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  dueDate: z.string().nullish(),
+});
+
+export type User = z.infer<typeof user>;
+export type Project = z.infer<typeof projectSchema>;
 
 //----------- validation ---------- //
 
@@ -65,17 +82,25 @@ export const apiResponseSchema = z.object({
   msg: z.string(),
 });
 
+export const projectsResponseSchema = apiResponseSchema.merge(
+  z.object({
+    currentPage: z.number(),
+    totalPages: z.number(),
+    totalProjects: z.number(),
+    projects: z.array(projectSchema),
+  })
+);
+
 export const loginResponseSchema = apiResponseSchema.merge(
-  z.object({ user: userSchema.omit({ password: true }) })
+  z.object({ user })
 );
 
 export const registerResponseSchema = apiResponseSchema;
 
 export const updateProfileResponseSchema = apiResponseSchema.merge(
-  z.object({ user: userSchema.omit({ password: true }) })
+  z.object({ user })
 );
 
 export type ApiResponse = z.infer<typeof apiResponseSchema>;
-export type LoginResponse = z.infer<typeof loginResponseSchema>;
-export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 export type UpdateProfileResponse = z.infer<typeof updateProfileResponseSchema>;
+export type ProjectsResponse = z.infer<typeof projectsResponseSchema>;

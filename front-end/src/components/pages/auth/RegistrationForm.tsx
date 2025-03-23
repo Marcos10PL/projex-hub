@@ -1,10 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, NavLink } from "react-router-dom";
-import API from "../../../utils/axiosConfig";
 import {
   RegisterForm,
-  RegisterResponse,
   registerResponseSchema,
   registerSchema,
 } from "../../../utils/zodSchemas";
@@ -12,15 +10,19 @@ import { useCallback, useState } from "react";
 
 import clsx from "clsx";
 import Spinner from "../../Spinner";
-import { AxiosError } from "axios";
 import ErrorMsg from "../../auth/ErrorMsg";
 import { resendEmail } from "../../../utils/utils";
+import useApi from "../../../utils/myHooks/useApi";
 
 export default function RegistrationForm() {
-  const [errorMsg, setErrorMsg] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const { loading, errorMsg, fetchData } = useApi(
+    "auth/register",
+    registerResponseSchema,
+    "post"
+  );
 
   const {
     handleSubmit,
@@ -29,32 +31,9 @@ export default function RegistrationForm() {
   } = useForm({ resolver: zodResolver(registerSchema) });
 
   const onSubmit: SubmitHandler<RegisterForm> = async data => {
-    try {
-      setErrorMsg("");
-      setLoading(true);
+    const res = await fetchData({ data });
 
-      const res = await API.post("auth/register", data);
-      const dataRes = registerResponseSchema.safeParse(res.data);
-
-      if (dataRes.data?.success) {
-        setEmail(data.email);
-      }
-    } catch (err: unknown) {
-      const { response } = err as AxiosError<RegisterResponse>;
-
-      if (response) {
-        if (response.status >= 500)
-          setErrorMsg("Server error. Please try again later.");
-        if (response.status === 400)
-          setErrorMsg(response.data.msg || "Invalid data");
-        if (response.status === 429)
-          setErrorMsg(response.data.msg + "." || "Too many requests.");
-      } else {
-        setErrorMsg("Something went wrong. Please try again later.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    if (res?.success) setEmail(data.email);
   };
 
   const handleResendEmail = useCallback(async () => {

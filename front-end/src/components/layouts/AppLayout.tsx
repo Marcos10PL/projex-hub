@@ -7,7 +7,7 @@ export default function AppLayout() {
       <header>
         <Nav />
       </header>
-      <main className="md:w-2/3 mx-auto px-4">
+      <main className="md:w-11/12 lg:w-4/5 xl:w-2/3 mx-auto px-4">
         <Outlet />
       </main>
     </>

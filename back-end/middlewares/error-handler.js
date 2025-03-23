@@ -9,8 +9,8 @@ const errorHandler = (err, req, res, next) => {
   }
 
   let customError = {
-    statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-    msg: err.message || "Something went wrong try again later",
+    statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+    msg: "Something went wrong",
   };
 
   if (err.name === "ValidationError") {
@@ -39,7 +39,7 @@ const errorHandler = (err, req, res, next) => {
     customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
-  // console.log(err);
+  console.log(err);
 
   return res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)

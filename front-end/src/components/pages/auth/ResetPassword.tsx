@@ -2,15 +2,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
-import { apiResponseSchema, ResetPasswordForm, resetPasswordSchema } from "../../../utils/zodSchemas";
+import {
+  apiResponseSchema,
+  ResetPasswordForm,
+  resetPasswordSchema,
+} from "../../../utils/zodSchemas";
 import ErrorMsg from "../../auth/ErrorMsg";
 import Spinner from "../../Spinner";
-import API from "../../../utils/axiosConfig";
+import useApi from "../../../utils/myHooks/useApi";
 
 export default function ResetPassword() {
   const { token } = useParams();
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const { fetchData, errorMsg, loading } = useApi(
+    "auth/reset-password",
+    apiResponseSchema,
+    "post",
+    {
+      400: "Sorry, something went wrong. If you want to change your password again, you must request a new reset email. If you arrived here accidentally, please leave this page.",
+    }
+  );
 
   const {
     handleSubmit,
@@ -19,34 +31,25 @@ export default function ResetPassword() {
   } = useForm({ resolver: zodResolver(resetPasswordSchema) });
 
   const onSubmit: SubmitHandler<ResetPasswordForm> = async data => {
-    try {
-      setLoading(true);
+    const res = await fetchData({
+      data: { ...data, token },
+    });
 
-      const res = await API.post("auth/reset-password", { ...data, token });
-      const dataRes = apiResponseSchema.safeParse(res.data);
-
-      if (dataRes.data?.success) {
-        setMessage(
-          "Password reset successfully! <br /> You can close this page."
-        );
-      }
-      // eslint-disable-next-line
-    } catch (err) {
-      // console.error(err)
-      setMessage(
-        "Sorry, something went wrong. If you want to change your password again, you must request a new reset email. If you arrived here accidentally, please leave this page."
-      );
-    } finally {
-      setLoading(false);
-    }
+    if (res?.success) setSuccess(true);
   };
 
-  if (message) {
+  if (success || errorMsg) {
     return (
       <>
         <div className="text-center">
           <div className="px-3 pb-6">
-            <p dangerouslySetInnerHTML={{ __html: message }} />
+            {errorMsg ? (
+              <ErrorMsg message={errorMsg} />
+            ) : (
+              <p>
+                "Password reset successfully! <br /> You can close this page."
+              </p>
+            )}
           </div>
         </div>
         <div className="text-center">

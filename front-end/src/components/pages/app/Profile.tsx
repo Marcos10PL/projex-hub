@@ -1,7 +1,6 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   UpdateProfileForm,
-  UpdateProfileResponse,
   updateProfileResponseSchema,
   updateProfileSchema,
 } from "../../../utils/zodSchemas";
@@ -10,19 +9,26 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../state/store";
-import API from "../../../utils/axiosConfig";
-import { AxiosError } from "axios";
 import { useCallback, useState } from "react";
 import Spinner from "../../Spinner";
 import { resendEmail } from "../../../utils/utils";
+import useApi from "../../../utils/myHooks/useApi";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
 
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const { fetchData, errorMsg, loading } = useApi(
+    "auth/update-profile",
+    updateProfileResponseSchema,
+    "patch",
+    {
+      400: "Email or username already taken",
+      401: "Invalid password. Please try again.",
+    }
+  );
 
   const {
     handleSubmit,
@@ -31,36 +37,9 @@ export default function Profile() {
   } = useForm({ resolver: zodResolver(updateProfileSchema) });
 
   const onSubmit: SubmitHandler<UpdateProfileForm> = async data => {
-    try {
-      setErrorMsg("");
-      setSuccess(false);
-      setLoading(true);
-
-      const res = await API.patch("auth/update", data);
-      const dataRes = updateProfileResponseSchema.safeParse(res.data);
-
-      if (dataRes.data?.success) {
-        setSuccess(true);
-      }
-    } catch (err: unknown) {
-      console.log(err);
-      const { response } = err as AxiosError<UpdateProfileResponse>;
-
-      if (response) {
-        if (response.status >= 500)
-          setErrorMsg("Server error. Please try again later.");
-        if (response.status === 400)
-          setErrorMsg(response?.data.msg || "Invalid data.");
-        if (response.status === 401)
-          setErrorMsg("Invalid password. Please try again.");
-        if (response.status === 429)
-          setErrorMsg(response.data.msg + "." || "Too many requests.");
-      } else {
-        setErrorMsg("Something went wrong. Please try again later.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    setSuccess(false);
+    const res = await fetchData({ data });
+    if (res?.success) setSuccess(true);
   };
 
   const handleResendEmail = useCallback(async () => {

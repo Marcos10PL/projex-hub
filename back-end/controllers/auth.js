@@ -42,6 +42,7 @@ const login = async (req, res) => {
     success: true,
     msg: "User logged in",
     user: {
+      _id: user._id,
       email: user.email,
       username: user.username,
       isActivated: user.isActivated,
@@ -211,19 +212,31 @@ const updateUser = async (req, res) => {
 
   if (!email && !username && !newPassword)
     throw new BadRequestError("Please at least provide one field to update");
-
+  
   if (!password)
     throw new BadRequestError("Please provide your current password");
-
+  
+  
   const user = await User.findOne({ email: req.user.email });
-
+  
   if (!user) throw new NotFoundError("No user found");
-
+  
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) throw new UnauthenticatedError("Invalid password");
+  
   if (!user.isActivated)
     throw new BadRequestError("Your email is not confirmed");
 
-  const isMatch = await user.matchPassword(password);
-  if (!isMatch) throw new UnauthenticatedError("Invalid password");
+  let existingUser = await User.findOne({ email });
+
+  if (existingUser && existingUser.email !== req.user.email)
+    throw new BadRequestError("Email already in use");
+
+  existingUser = await User.findOne({ username });
+
+  if (existingUser && existingUser.username !== req.user.username)
+    throw new BadRequestError("Username already in use");
+
 
   let state = false;
   let isEmailChanged = false;
@@ -269,6 +282,7 @@ const updateUser = async (req, res) => {
     success: true,
     msg: "User updated" + msg,
     user: {
+      _id: user._id,
       email: user.email,
       username: user.username,
       isActivated: user.isActivated,

@@ -34,7 +34,7 @@ const projectSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ["planned", "active", "completed", "completed-delayed", "delayed"],
+      enum: ["planned", "active", "completed", "delayed"],
       default: "active",
     },
     dueDate: Date,
