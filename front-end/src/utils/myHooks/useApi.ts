@@ -30,28 +30,12 @@ export default function useApi<T>(
       setErrorMsg("");
 
       try {
-        let finalUrl = url;
-
-        if (method === "get" && options?.params) {
-          const query = new URLSearchParams(options.params).toString();
-          finalUrl += `?${query}`;
-          console.log(finalUrl);
-        }
-
-        const axiosOptions: AxiosRequestConfig = {
+        const res: AxiosResponse<T> = await API.request({
+          url,
           ...options,
           method,
-        };
-
-        if (method !== "get" && options?.data) {
-          axiosOptions.data = options.data;
-        }
-
-        const res: AxiosResponse<T> = await API.request({
-          url: finalUrl,
-          ...axiosOptions,
         });
-
+        
         const dataRes = schema.safeParse(res.data);
 
         if (!dataRes.success) console.log(dataRes.error);

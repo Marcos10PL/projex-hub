@@ -7,8 +7,10 @@ import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
 
 const getAllProjects = async (req, res) => {
-  const { status, search, sort, order, dueDate, dueDateAfter, dueDateBefore } =
+  const { status, search, sort, dueDate, dueDateAfter, dueDateBefore } =
     req.query;
+
+  console.log(dueDateAfter, dueDateBefore);
 
   const userId = req.user._id;
 
@@ -26,12 +28,6 @@ const getAllProjects = async (req, res) => {
 
   if (sort === "dueDateAsc") result = result.sort({ dueDate: 1 });
   if (sort === "dueDateDesc") result = result.sort({ dueDate: -1 });
-
-  if (sort) {
-    const orderType = order === "asc" ? 1 : -1;
-    const sortQuery = { [sort]: orderType };
-    result = result.sort(sortQuery);
-  }
 
   if (dueDate === "today") {
     const today = new Date();
@@ -83,7 +79,7 @@ const getAllProjects = async (req, res) => {
   }
 
   if (dueDate === "noDueDate") {
-    result = result.where("dueDate").exists(false);
+    result = result.where("dueDate").eq(null);
   }
 
   if (dueDate === "overdue") {
@@ -102,20 +98,21 @@ const getAllProjects = async (req, res) => {
 
   if (dueDateBefore) {
     const date = new Date(dueDateBefore);
-    date.setHours(0, 0, 0, 0);
+    date.setUTCHours(23, 59, 59, 999); 
+    console.log(date);
 
-    result = result.where("dueDate").lt(date);
+    result = result.where("dueDate").lt(date);  // do 20 marca     21 marca
   }
 
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  result = result.skip(skip).limit(limit);
+  const totalProjects = await Project.countDocuments(result);
 
+  result = result.skip(skip).limit(limit);
   const projects = await result;
 
-  const totalProjects = await Project.countDocuments(query);
   const totalPages = Math.ceil(totalProjects / limit);
 
   res.status(StatusCodes.OK).json({

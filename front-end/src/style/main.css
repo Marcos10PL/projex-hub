@@ -29,7 +29,7 @@ body {
 
 .link {
   color: var(--secondary);
-  transition: color .15s ease-in-out;
+  transition: color 0.15s ease-in-out;
 }
 
 .link:hover {
@@ -44,7 +44,7 @@ body {
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all .15s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 .button:hover {
@@ -55,4 +55,28 @@ body {
 .button:focus {
   outline: none;
   border: 2px solid var(--secondary);
-} 
+}
+
+/* day picker */
+
+.rdp-day_button {
+  padding: .5rem .8rem;
+  cursor: pointer;
+}
+
+@media screen and (min-width: 768px) {
+  .rdp-day_button {
+    padding: .5rem .8rem;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .rdp-day_button {
+    padding: .5rem 1rem;
+  }
+  
+}
+
+.rdp-day_button:hover {
+  color: var(--primary);
+}

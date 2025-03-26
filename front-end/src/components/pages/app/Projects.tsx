@@ -1,32 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { Project, projectsResponseSchema } from "../../../utils/zodSchemas";
+import { ProjectType, projectsResponseSchema } from "../../../utils/zodSchemas";
 import useApi from "../../../utils/myHooks/useApi";
 import Select, { StylesConfig } from "react-select";
+import Spinner from "../../Spinner";
+import SelectDueDate from "../../app/SelectDueDay";
+import {
+  OptionDueDate,
+  optionsDueDate,
+  OptionsDueDate,
+  OptionSort,
+  optionsSort,
+  OptionsSort,
+  optionsStatus,
+  OptionsStatus,
+  OptionStatus,
+  OptionType,
+} from "../../../utils/data";
+import Project from "../../app/Project";
 
-const optionsStatus = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "planned", label: "Planned" },
-  { value: "completed", label: "Completed" },
-  { value: "delayed", label: "Delayed" },
-] as const;
-
-const optionsSort = [
-  { value: "dueDateAsc", label: "Earliest due date" },
-  { value: "dueDateDesc", label: "Latest due date" },
-  { value: "latest", label: "Latest created" },
-  { value: "oldest", label: "Oldest created" },
-] as const;
-
-type OptionSort = (typeof optionsSort)[number];
-type OptionsSort = OptionSort["value"];
-
-type OptionStatus = (typeof optionsStatus)[number];
-type OptionsStatus = OptionStatus["value"];
-
-type OptionType = { value: string; label: string };
-
-const customStyles: StylesConfig<OptionType, false> = {
+const customStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
   control: (styles, { isFocused }) => ({
     ...styles,
     backgroundColor: "#2D3748",
@@ -35,15 +27,12 @@ const customStyles: StylesConfig<OptionType, false> = {
     marginBottom: "0.1rem",
     ":hover": {
       border: "none",
-      backgroundColor: "#2D3744",
+      backgroundColor: "#6799",
     },
   }),
   dropdownIndicator: styles => ({
     ...styles,
     color: "white",
-    ":hover": {
-      color: "gray",
-    },
   }),
   option: (styles, { isFocused }) => ({
     ...styles,
@@ -65,14 +54,17 @@ const customStyles: StylesConfig<OptionType, false> = {
     ...styles,
     color: "white",
   }),
-};
+});
 
 export default function Projects() {
-  const [selectedStatus, setSelectedStatus] = useState<OptionsStatus>("all");
-  const [selectedSort, setSelectedSort] = useState<OptionsSort>("dueDateDesc");
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<OptionsStatus>();
+  const [selectedSort, setSelectedSort] = useState<OptionsSort>();
+  const [selectedDueDate, setSelectedDueDate] = useState<OptionsDueDate>();
+  const [selectedDueDayBefore, setSelectedDueDayBefore] = useState<Date>();
+  const [selectedDueDayAfter, setSelectedDueDayAfter] = useState<Date>();
+  const [projects, setProjects] = useState<ProjectType[]>([]);
 
-  const { fetchData, loading, errorMsg } = useApi(
+  const { fetchData, loading } = useApi(
     "projects",
     projectsResponseSchema,
     "get",
@@ -85,52 +77,127 @@ export default function Projects() {
     const getProjects = async () => {
       let params = {};
 
-      if (selectedStatus !== "all") params = { status: selectedStatus };
+      if (selectedStatus) params = { ...params, status: selectedStatus };
+      if (selectedSort) params = { ...params, sort: selectedSort };
+      if (selectedDueDate) params = { ...params, dueDate: selectedDueDate };
+
+      if (selectedDueDayBefore) {
+        const fixedDate = new Date(selectedDueDayBefore);
+        const localISOTime = new Date(
+          fixedDate.getTime() - fixedDate.getTimezoneOffset() * 60000
+        ).toISOString();
+
+        params = {
+          ...params,
+          dueDateBefore: localISOTime,
+        };
+      }
+
+      if (selectedDueDayAfter) {
+        const fixedDate = new Date(selectedDueDayAfter);
+        const localISOTime = new Date(
+          fixedDate.getTime() - fixedDate.getTimezoneOffset() * 60000
+        ).toISOString();
+
+        params = {
+          ...params,
+          dueDateAfter: localISOTime,
+        };
+      }
 
       const data = await fetchDataRef.current({ params });
       console.log(data);
       if (data) setProjects(data.projects);
     };
     getProjects();
-  }, [selectedStatus]);
+  }, [
+    selectedStatus,
+    selectedSort,
+    selectedDueDate,
+    selectedDueDayBefore,
+    selectedDueDayAfter,
+  ]);
+
+  useEffect(() => {
+    if (selectedDueDate) {
+      setSelectedDueDayBefore(undefined);
+      setSelectedDueDayAfter(undefined);
+    }
+  }, [selectedDueDate]);
+
+  useEffect(() => {
+    if (selectedDueDayBefore) setSelectedDueDate(null);
+    if (selectedDueDayAfter) setSelectedDueDate(null);
+  }, [selectedDueDayBefore, selectedDueDayAfter]);
 
   return (
     <>
-      <div className="flex items-center gap-4 pb-4">
-        <Select
-          options={optionsStatus}
-          value={optionsStatus.find(option => option.value === selectedStatus)}
-          className="w-1/4"
-          isSearchable={false}
-          styles={customStyles}
-          onChange={option =>
-            setSelectedStatus((option?.value as OptionsStatus) || "all")
-          }
+      {/* SELECTS */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 my-4">
+        <SelectDueDate
+          selectedDueDay={selectedDueDayBefore}
+          setSelectedDueDay={setSelectedDueDayBefore}
+          title="Due before"
         />
-        <Select
-          options={optionsSort}
-          value={optionsSort.find(option => option.value === selectedSort)}
-          className="w-1/3"
-          isSearchable={false}
-          styles={customStyles}
-          onChange={option =>
-            setSelectedSort((option?.value as OptionsSort) || "dueDateDesc")
-          }
+        <SelectDueDate
+          selectedDueDay={selectedDueDayAfter}
+          setSelectedDueDay={setSelectedDueDayAfter}
+          title="Due after"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project: any) => (
-          <div
-            key={project._id}
-            className="bg-gray-800 rounded-lg p-5 text-white"
-          >
-            <h1 className="text-2xl font-bold">{project.name}</h1>
-            <p className="text-sm">{project.description}</p>
-            <p className="text-sm">Status: {project.status}</p>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
+        <label>
+          <p className="opacity-70 pb-1">Status</p>
+          <Select
+            options={optionsStatus}
+            value={optionsStatus.find(
+              option => option.value === selectedStatus
+            )}
+            isSearchable={false}
+            styles={customStyles<OptionStatus>()}
+            onChange={option => setSelectedStatus(option?.value || null)}
+          />
+        </label>
+        <label>
+          <p className="opacity-70 pb-1">Sort</p>
+          <Select
+            options={optionsSort}
+            value={optionsSort.find(option => option.value === selectedSort)}
+            isSearchable={false}
+            styles={customStyles<OptionSort>()}
+            onChange={option => setSelectedSort(option?.value || null)}
+          />
+        </label>
+        <label>
+          <p className="opacity-70 pb-1">Due date</p>
+          <Select
+            options={optionsDueDate}
+            value={optionsDueDate.find(
+              option => option.value === selectedDueDate
+            )}
+            isSearchable={false}
+            styles={customStyles<OptionDueDate>()}
+            onChange={option => setSelectedDueDate(option?.value || null)}
+          />
+        </label>
       </div>
+
+      {/* BORDER */}
+      <div className="border-t-2 border-dashed my-6 md:my-8" />
+
+      {/* PROJECTS */}
+      {!loading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {projects.map(project => (
+            <Project key={project._id} project={project} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex justify-center items-center">
+          <Spinner size={4} />
+        </div>
+      )}
     </>
   );
 }

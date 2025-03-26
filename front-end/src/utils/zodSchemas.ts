@@ -36,14 +36,14 @@ export const projectSchema = z.object({
   description: z.string(),
   owner: user.omit({ isActivated: true, email: true }),
   members: z.array(user.omit({ isActivated: true, email: true })),
-  status: z.string(),
+  status: z.enum(["planned", "active", "completed", "delayed"]),
   createdAt: z.string(),
   updatedAt: z.string(),
   dueDate: z.string().nullish(),
 });
 
 export type User = z.infer<typeof user>;
-export type Project = z.infer<typeof projectSchema>;
+export type ProjectType = z.infer<typeof projectSchema>;
 
 //----------- validation ---------- //
 
@@ -91,9 +91,7 @@ export const projectsResponseSchema = apiResponseSchema.merge(
   })
 );
 
-export const loginResponseSchema = apiResponseSchema.merge(
-  z.object({ user })
-);
+export const loginResponseSchema = apiResponseSchema.merge(z.object({ user }));
 
 export const registerResponseSchema = apiResponseSchema;
 
