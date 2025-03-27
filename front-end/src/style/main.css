@@ -36,6 +36,7 @@ body {
   color: var(--text);
 }
 
+
 .button {
   font: inherit;
   background-color: var(--primary-dark);

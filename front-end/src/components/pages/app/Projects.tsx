@@ -3,7 +3,7 @@ import { ProjectType, projectsResponseSchema } from "../../../utils/zodSchemas";
 import useApi from "../../../utils/myHooks/useApi";
 import Select, { StylesConfig } from "react-select";
 import Spinner from "../../Spinner";
-import SelectDueDate from "../../app/SelectDueDay";
+import SelectDueDate from "../../app/Projects/SelectDueDay";
 import {
   OptionDueDate,
   optionsDueDate,
@@ -16,7 +16,7 @@ import {
   OptionStatus,
   OptionType,
 } from "../../../utils/data";
-import Project from "../../app/Project";
+import Project from "../../app/Projects/Project";
 
 const customStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
   control: (styles, { isFocused }) => ({
@@ -133,7 +133,7 @@ export default function Projects() {
   return (
     <>
       {/* SELECTS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 my-4">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 my-4">
         <SelectDueDate
           selectedDueDay={selectedDueDayBefore}
           setSelectedDueDay={setSelectedDueDayBefore}
@@ -144,9 +144,9 @@ export default function Projects() {
           setSelectedDueDay={setSelectedDueDayAfter}
           title="Due after"
         />
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
         <label>
           <p className="opacity-70 pb-1">Status</p>
           <Select
@@ -156,7 +156,7 @@ export default function Projects() {
             )}
             isSearchable={false}
             styles={customStyles<OptionStatus>()}
-            onChange={option => setSelectedStatus(option?.value || null)}
+            onChange={option => setSelectedStatus(option?.value)}
           />
         </label>
         <label>
@@ -166,7 +166,7 @@ export default function Projects() {
             value={optionsSort.find(option => option.value === selectedSort)}
             isSearchable={false}
             styles={customStyles<OptionSort>()}
-            onChange={option => setSelectedSort(option?.value || null)}
+            onChange={option => setSelectedSort(option?.value)}
           />
         </label>
         <label>
@@ -178,21 +178,21 @@ export default function Projects() {
             )}
             isSearchable={false}
             styles={customStyles<OptionDueDate>()}
-            onChange={option => setSelectedDueDate(option?.value || null)}
+            onChange={option => setSelectedDueDate(option?.value)}
           />
         </label>
-      </div>
+      </section>
 
       {/* BORDER */}
       <div className="border-t-2 border-dashed my-6 md:my-8" />
 
       {/* PROJECTS */}
       {!loading ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map(project => (
             <Project key={project._id} project={project} />
           ))}
-        </div>
+        </section>
       ) : (
         <div className="flex justify-center items-center">
           <Spinner size={4} />

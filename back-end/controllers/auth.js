@@ -315,6 +315,11 @@ const sendConfirmationEmail = async email => {
   }
 };
 
+const getUsers = async (req, res) => {
+  const users = await User.find({}).select("_id username");
+  res.status(StatusCodes.OK).json({ success: true, msg: "Users fetched successfully", users });
+}
+
 export {
   login,
   register,
@@ -325,4 +330,5 @@ export {
   forgotPassword,
   resetPassword,
   updateUser,
+  getUsers,
 };

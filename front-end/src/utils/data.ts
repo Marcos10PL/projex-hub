@@ -1,11 +1,15 @@
-//------------ Select options for filtering projects ------------//
+//------------ Select options for projects ------------//
 
-export const optionsStatus = [
-  { value: null, label: "All" },
+const optionsStatusCommon = [
   { value: "active", label: "Active" },
   { value: "planned", label: "Planned" },
   { value: "completed", label: "Completed" },
   { value: "delayed", label: "Delayed" },
+] as const;
+
+export const optionsStatus = [
+  { value: null, label: "All" },
+  ...optionsStatusCommon,
 ] as const;
 
 export const optionsSort = [
@@ -37,3 +41,17 @@ export type OptionStatus = (typeof optionsStatus)[number];
 export type OptionsStatus = OptionStatus["value"];
 
 export type OptionType = OptionSort | OptionStatus | OptionDueDate;
+
+export const optionsStatusNoNull = optionsStatusCommon;
+
+export type OptionStatusNoNull = (typeof optionsStatusNoNull)[number];
+export type OptionsStatusNoNull = OptionStatusNoNull["value"];
+
+// ------------ Status color ------------//
+
+export const statusColor = {
+  active: "bg-green-500",
+  planned: "bg-yellow-500",
+  completed: "bg-blue-500",
+  delayed: "bg-red-500",
+} as const;

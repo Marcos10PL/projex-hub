@@ -5,6 +5,7 @@ import Project from "../models/project.js";
 import Task from "../models/task.js";
 import User from "../models/user.js";
 import { StatusCodes } from "http-status-codes";
+import mongoose from "mongoose";
 
 const getAllProjects = async (req, res) => {
   const { status, search, sort, dueDate, dueDateAfter, dueDateBefore } =
@@ -98,10 +99,10 @@ const getAllProjects = async (req, res) => {
 
   if (dueDateBefore) {
     const date = new Date(dueDateBefore);
-    date.setUTCHours(23, 59, 59, 999); 
+    date.setUTCHours(23, 59, 59, 999);
     console.log(date);
 
-    result = result.where("dueDate").lt(date);  // do 20 marca     21 marca
+    result = result.where("dueDate").lt(date); // do 20 marca     21 marca
   }
 
   const page = Number(req.query.page) || 1;
@@ -130,6 +131,10 @@ const getAllProjects = async (req, res) => {
 const getProject = async (req, res) => {
   const userId = req.user._id;
 
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    throw new BadRequestError("Invalid project ID");
+  }
+
   const project = await Project.findOne({
     _id: req.params.id,
     $or: [{ owner: userId }, { members: userId }],
@@ -156,7 +161,8 @@ const createProject = async (req, res) => {
 
   const projectExists = await Project.findOne({ name, owner: ownerId });
 
-  if (projectExists) throw new BadRequestError("Project already exists");
+  if (projectExists)
+    throw new BadRequestError("Project already exists with this name");
 
   const project = await Project.create({
     name,
@@ -191,22 +197,25 @@ const updateProject = async (req, res) => {
 
   let state = false;
 
-  if (name) {
+  if (name && name !== project.name) {
+    const existingProject = await Project.findOne({ name });
+    if (existingProject)
+      throw new BadRequestError("Project already exists with this name");
     project.name = name;
     state = true;
   }
 
-  if (description) {
+  if (description && description !== project.description) {
     project.description = description;
     state = true;
   }
 
-  if (status) {
+  if (status && status !== project.status) {
     project.status = status;
     state = true;
   }
 
-  if (dueDate) {
+  if (dueDate && dueDate !== project.dueDate) {
     project.dueDate = dueDate;
     state = true;
   }
@@ -307,13 +316,13 @@ const deleteMember = async (req, res) => {
 };
 
 const createTask = async (req, res) => {
-  const { name, description, status } = req.body;
+  const { name, status } = req.body;
   let { dueDate } = req.body;
 
   dueDate = dueDate ? new Date(dueDate) : null;
 
-  if (!name || !description)
-    throw new BadRequestError("Please provide a name and description");
+  if (!name)
+    throw new BadRequestError("Please provide a name");
 
   const project = await Project.findOne({
     _id: req.params.id,
@@ -324,7 +333,6 @@ const createTask = async (req, res) => {
 
   const task = await Task.create({
     name,
-    description,
     dueDate,
     status,
   });
@@ -341,7 +349,7 @@ const createTask = async (req, res) => {
 };
 
 const updateTask = async (req, res) => {
-  const { name, description, status } = req.body;
+  const { name, status } = req.body;
   let { dueDate } = req.body;
   const taskId = req.params.taskId;
   const userId = req.user._id;
@@ -375,11 +383,6 @@ const updateTask = async (req, res) => {
   if (isAuthorizedOwner) {
     if (name) {
       task.name = name;
-      state = true;
-    }
-
-    if (description) {
-      task.description = description;
       state = true;
     }
 

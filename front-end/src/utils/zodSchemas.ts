@@ -30,16 +30,32 @@ export const userSchema = user.merge(
   })
 );
 
-export const projectSchema = z.object({
+export const taskSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  description: z.string(),
-  owner: user.omit({ isActivated: true, email: true }),
-  members: z.array(user.omit({ isActivated: true, email: true })),
-  status: z.enum(["planned", "active", "completed", "delayed"]),
+  status: z.enum(["in-progress", "done"]),
+  dueDate: z.string().nullish(),
+  completedAt: z.string().nullish(),
   createdAt: z.string(),
   updatedAt: z.string(),
+});
+
+export const projectSchema = z.object({
+  _id: z.string(),
+  name: z
+    .string()
+    .min(3, "Name must be between 3 and 30 characters long")
+    .max(50, "Name must be between 3 and 30 characters long"),
+  description: z
+    .string()
+    .min(3, "Description must be at least 3 characters long"),
+  owner: user.omit({ isActivated: true, email: true }),
+  members: z.array(user.omit({ isActivated: true, email: true })),
+  tasks: z.array(taskSchema),
+  status: z.enum(["planned", "active", "completed", "delayed"]),
   dueDate: z.string().nullish(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export type User = z.infer<typeof user>;
@@ -69,11 +85,19 @@ export const updateProfileSchema = z.object({
   password: userSchema.shape.password,
 });
 
+export const createOrUpdateProjectSchema = projectSchema.pick({
+  name: true,
+  description: true,
+});
+
 export type ForgotPassowrdForm = z.infer<typeof forgotPasswordSchema>;
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
 export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 export type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
+export type CreateOrUpdateProjectForm = z.infer<
+  typeof createOrUpdateProjectSchema
+>;
 
 //----------- api response ---------- //
 
@@ -89,6 +113,10 @@ export const projectsResponseSchema = apiResponseSchema.merge(
     totalProjects: z.number(),
     projects: z.array(projectSchema),
   })
+);
+
+export const projectResponseSchema = apiResponseSchema.merge(
+  z.object({ project: projectSchema })
 );
 
 export const loginResponseSchema = apiResponseSchema.merge(z.object({ user }));

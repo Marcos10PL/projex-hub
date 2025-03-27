@@ -31,7 +31,7 @@ export default function SelectDueDate({
     <div className="relative w-full">
       <button
         onClick={() => setIsOpened(!isOpened)}
-        className="bg-slate-700 p-2 rounded-lg w-full text-left flex justify-between items-center border-2 border-slate-500 focus:border-primary-dark hover:bg-gray-600 transition-colors"
+        className="bg-gray-800 p-2 rounded-lg w-full text-left flex justify-between items-center border-2 border-gray-500 focus:border-primary hover:border-primary hover:bg-gray-700 transition-colors"
       >
         {title} - {selectedDueDay ? selectedDueDay.toDateString() : "choose"}
         {isOpened ? (
