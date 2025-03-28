@@ -11,8 +11,6 @@ const getAllProjects = async (req, res) => {
   const { status, search, sort, dueDate, dueDateAfter, dueDateBefore } =
     req.query;
 
-  console.log(dueDateAfter, dueDateBefore);
-
   const userId = req.user._id;
 
   const query = {
@@ -201,6 +199,7 @@ const updateProject = async (req, res) => {
     const existingProject = await Project.findOne({ name });
     if (existingProject)
       throw new BadRequestError("Project already exists with this name");
+
     project.name = name;
     state = true;
   }
@@ -242,7 +241,6 @@ const deleteProject = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     msg: "Project deleted successfully",
-    project,
   });
 };
 
@@ -317,9 +315,6 @@ const deleteMember = async (req, res) => {
 
 const createTask = async (req, res) => {
   const { name, status } = req.body;
-  let { dueDate } = req.body;
-
-  dueDate = dueDate ? new Date(dueDate) : null;
 
   if (!name)
     throw new BadRequestError("Please provide a name");
@@ -333,7 +328,6 @@ const createTask = async (req, res) => {
 
   const task = await Task.create({
     name,
-    dueDate,
     status,
   });
 
@@ -350,13 +344,10 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   const { name, status } = req.body;
-  let { dueDate } = req.body;
   const taskId = req.params.taskId;
   const userId = req.user._id;
 
-  dueDate = dueDate ? new Date(dueDate) : null;
-
-  if (!name && !description && !status && !dueDate)
+  if (!name && !description && !status)
     throw new BadRequestError("Please provide at least one field to update");
 
   const task = await Task.findById(taskId);
@@ -388,11 +379,6 @@ const updateTask = async (req, res) => {
 
     if (status) {
       task.status = status;
-      state = true;
-    }
-
-    if (dueDate) {
-      task.dueDate = dueDate;
       state = true;
     }
   }

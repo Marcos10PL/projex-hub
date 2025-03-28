@@ -7,7 +7,7 @@ import {
   ResetPasswordForm,
   resetPasswordSchema,
 } from "../../../utils/zodSchemas";
-import ErrorMsg from "../../auth/ErrorMsg";
+import ErrorMsg from "../../ErrorMsg";
 import Spinner from "../../Spinner";
 import useApi from "../../../utils/myHooks/useApi";
 

@@ -9,7 +9,7 @@ import {
 } from "../../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import ErrorMsg from "../../auth/ErrorMsg";
+import ErrorMsg from "../../ErrorMsg";
 import useApi from "../../../utils/myHooks/useApi";
 
 export default function ForgotPassword() {

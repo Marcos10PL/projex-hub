@@ -28,10 +28,11 @@ export default function SelectDueDate({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full ">
       <button
+        type="button"
         onClick={() => setIsOpened(!isOpened)}
-        className="bg-gray-800 p-2 rounded-lg w-full text-left flex justify-between items-center border-2 border-gray-500 focus:border-primary hover:border-primary hover:bg-gray-700 transition-colors"
+        className="bg-gray-800 px-2 py-1.5 rounded-lg w-full text-left flex justify-between items-center border-2 border-gray-500 focus:border-primary hover:border-primary hover:bg-gray-700 transition-colors"
       >
         {title} - {selectedDueDay ? selectedDueDay.toDateString() : "choose"}
         {isOpened ? (
@@ -48,7 +49,7 @@ export default function SelectDueDate({
             classNames={{
               selected: `bg-gray-700 text-primary rounded-full`,
               today: `bg-gray-700 rounded-full`,
-              root: `text-center `,
+              root: `text-center`,
               chevron: `fill-secondary text-center cursor-pointer`,
             }}
             selected={selectedDueDay || undefined}

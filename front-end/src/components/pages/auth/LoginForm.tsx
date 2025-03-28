@@ -10,7 +10,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import Spinner from "../../Spinner";
 import clsx from "clsx";
-import ErrorMsg from "../../auth/ErrorMsg";
+import ErrorMsg from "../../ErrorMsg.tsx";
 import useApi from "../../../utils/myHooks/useApi.ts";
 
 export default function LoginForm() {

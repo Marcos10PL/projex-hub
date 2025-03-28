@@ -34,10 +34,7 @@ export const taskSchema = z.object({
   _id: z.string(),
   name: z.string(),
   status: z.enum(["in-progress", "done"]),
-  dueDate: z.string().nullish(),
   completedAt: z.string().nullish(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
 });
 
 export const projectSchema = z.object({

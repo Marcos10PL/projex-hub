@@ -1,5 +1,7 @@
 //------------ Select options for projects ------------//
 
+import { StylesConfig } from "react-select";
+
 const optionsStatusCommon = [
   { value: "active", label: "Active" },
   { value: "planned", label: "Planned" },
@@ -40,12 +42,16 @@ export type OptionsSort = OptionSort["value"];
 export type OptionStatus = (typeof optionsStatus)[number];
 export type OptionsStatus = OptionStatus["value"];
 
-export type OptionType = OptionSort | OptionStatus | OptionDueDate;
-
 export const optionsStatusNoNull = optionsStatusCommon;
 
 export type OptionStatusNoNull = (typeof optionsStatusNoNull)[number];
 export type OptionsStatusNoNull = OptionStatusNoNull["value"];
+
+export type OptionType =
+  | OptionSort
+  | OptionStatus
+  | OptionDueDate
+  | OptionStatusNoNull;
 
 // ------------ Status color ------------//
 
@@ -55,3 +61,61 @@ export const statusColor = {
   completed: "bg-blue-500",
   delayed: "bg-red-500",
 } as const;
+
+// ------------ Select styles ------------//
+export const customStyles = <T extends OptionType>(): StylesConfig<
+  T,
+  false
+> => ({
+  control: (styles, { isFocused }) => ({
+    ...styles,
+    backgroundColor: "#1e2939",
+    borderRadius: "0.5rem",
+    border: isFocused ? "2px solid var(--primary)" : "2px solid #6a7282",
+    outline: isFocused ? "2px solid #020618" : "2px solid #020618",
+    padding: "0.1rem",
+    ":hover": {
+      border: "2px solid var(--primary)",
+      outline: isFocused ? "2px solid #020618" : "2px solid #020618",
+      backgroundColor: "#364153",
+    },
+  }),
+  dropdownIndicator: styles => ({
+    ...styles,
+    color: "var(--text)",
+    ":hover": {
+      color: "var(--text)",
+    },
+  }),
+  option: (styles, { isFocused }) => ({
+    ...styles,
+    backgroundColor: isFocused ? "#4B5563" : "#2D3748",
+    ":active": {
+      backgroundColor: "#4B5563",
+    },
+    ":hover": {
+      backgroundColor: "#4B5563",
+    },
+  }),
+  menu: styles => ({
+    ...styles,
+    backgroundColor: "#2D3748",
+    outline: "2px solid #568",
+  }),
+  singleValue: styles => ({
+    ...styles,
+    color: "var(--text)",
+  }),
+});
+
+// ------------ project params ------------//
+export type ProjectParams = {
+  status?: OptionsStatus | undefined;
+  sort?: OptionsSort | undefined;
+  dueDate?: OptionsDueDate | undefined;
+  dueDateBefore?: string | undefined;
+  dueDateAfter?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+  search?: string | undefined;
+};

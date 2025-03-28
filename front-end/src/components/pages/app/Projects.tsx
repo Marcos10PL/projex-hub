@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { ProjectType, projectsResponseSchema } from "../../../utils/zodSchemas";
-import useApi from "../../../utils/myHooks/useApi";
-import Select, { StylesConfig } from "react-select";
+import { useEffect, useState } from "react";
+import Select from "react-select";
 import Spinner from "../../Spinner";
 import SelectDueDate from "../../app/Projects/SelectDueDay";
 import {
+  customStyles,
   OptionDueDate,
   optionsDueDate,
   OptionsDueDate,
@@ -14,47 +13,9 @@ import {
   optionsStatus,
   OptionsStatus,
   OptionStatus,
-  OptionType,
 } from "../../../utils/data";
 import Project from "../../app/Projects/Project";
-
-const customStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
-  control: (styles, { isFocused }) => ({
-    ...styles,
-    backgroundColor: "#2D3748",
-    border: "none",
-    outline: isFocused ? "2px solid #8500dd" : "2px solid #568",
-    marginBottom: "0.1rem",
-    ":hover": {
-      border: "none",
-      backgroundColor: "#6799",
-    },
-  }),
-  dropdownIndicator: styles => ({
-    ...styles,
-    color: "white",
-  }),
-  option: (styles, { isFocused }) => ({
-    ...styles,
-    backgroundColor: isFocused ? "#4B5563" : "#2D3748",
-    color: "white",
-    ":active": {
-      backgroundColor: "#4B5563",
-    },
-    ":hover": {
-      backgroundColor: "#4B5563",
-    },
-  }),
-  menu: styles => ({
-    ...styles,
-    backgroundColor: "#2D3748",
-    outline: "2px solid #568",
-  }),
-  singleValue: styles => ({
-    ...styles,
-    color: "white",
-  }),
-});
+import useProjects from "../../../utils/myHooks/useProjects";
 
 export default function Projects() {
   const [selectedStatus, setSelectedStatus] = useState<OptionsStatus>();
@@ -62,61 +23,14 @@ export default function Projects() {
   const [selectedDueDate, setSelectedDueDate] = useState<OptionsDueDate>();
   const [selectedDueDayBefore, setSelectedDueDayBefore] = useState<Date>();
   const [selectedDueDayAfter, setSelectedDueDayAfter] = useState<Date>();
-  const [projects, setProjects] = useState<ProjectType[]>([]);
 
-  const { fetchData, loading } = useApi(
-    "projects",
-    projectsResponseSchema,
-    "get",
-    { 404: "Projects not found." }
-  );
-
-  const fetchDataRef = useRef(fetchData);
-
-  useEffect(() => {
-    const getProjects = async () => {
-      let params = {};
-
-      if (selectedStatus) params = { ...params, status: selectedStatus };
-      if (selectedSort) params = { ...params, sort: selectedSort };
-      if (selectedDueDate) params = { ...params, dueDate: selectedDueDate };
-
-      if (selectedDueDayBefore) {
-        const fixedDate = new Date(selectedDueDayBefore);
-        const localISOTime = new Date(
-          fixedDate.getTime() - fixedDate.getTimezoneOffset() * 60000
-        ).toISOString();
-
-        params = {
-          ...params,
-          dueDateBefore: localISOTime,
-        };
-      }
-
-      if (selectedDueDayAfter) {
-        const fixedDate = new Date(selectedDueDayAfter);
-        const localISOTime = new Date(
-          fixedDate.getTime() - fixedDate.getTimezoneOffset() * 60000
-        ).toISOString();
-
-        params = {
-          ...params,
-          dueDateAfter: localISOTime,
-        };
-      }
-
-      const data = await fetchDataRef.current({ params });
-      console.log(data);
-      if (data) setProjects(data.projects);
-    };
-    getProjects();
-  }, [
+  const { projects, loading } = useProjects({
     selectedStatus,
     selectedSort,
     selectedDueDate,
     selectedDueDayBefore,
     selectedDueDayAfter,
-  ]);
+  });
 
   useEffect(() => {
     if (selectedDueDate) {

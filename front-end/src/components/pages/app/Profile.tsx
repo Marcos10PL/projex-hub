@@ -4,7 +4,7 @@ import {
   updateProfileResponseSchema,
   updateProfileSchema,
 } from "../../../utils/zodSchemas";
-import ErrorMsg from "../../auth/ErrorMsg";
+import ErrorMsg from "../../ErrorMsg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import { useSelector } from "react-redux";

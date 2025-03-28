@@ -16,13 +16,16 @@ import HomeLayout from "./components/layouts/HomeLyout";
 import PrivacyPolicy from "./components/pages/PrivacyPolicy";
 import Profile from "./components/pages/app/Profile";
 import Home from "./components/pages/app/Home";
+import ProjectDetails from "./components/pages/app/Project/ProjectDetails";
 import Projects from "./components/pages/app/Projects";
-import ProjectDetails from "./components/pages/app/ProjectDetails";
+import UpdateProject from "./components/pages/app/Project/UpdateProject";
+import DeleteProject from "./components/pages/app/Project/DeleteProject";
 
 export default function App() {
   const { isAuthenticated, loading } = useSelector(
     (state: RootState) => state.currentUser
   );
+  
 
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
@@ -61,7 +64,12 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/projects">
                   <Route index element={<Projects />} />
-                  <Route path=":id" element={<ProjectDetails />} />
+                  <Route path=":id">
+                    <Route index element={<ProjectDetails />} />
+                    <Route path="update" element={<UpdateProject />} />
+                    <Route path="delete" element={<DeleteProject />} />
+                  </Route>
+                  <Route path="create" element={<ProjectDetails />} />
                 </Route>
                 <Route path="/profile" element={<Profile />} />
               </Route>

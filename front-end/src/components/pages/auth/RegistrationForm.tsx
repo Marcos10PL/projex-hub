@@ -10,7 +10,7 @@ import { useCallback, useState } from "react";
 
 import clsx from "clsx";
 import Spinner from "../../Spinner";
-import ErrorMsg from "../../auth/ErrorMsg";
+import ErrorMsg from "../../ErrorMsg";
 import { resendEmail } from "../../../utils/utils";
 import useApi from "../../../utils/myHooks/useApi";
 

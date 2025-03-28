@@ -14,10 +14,9 @@ const taskSchema = new mongoose.Schema(
       enum: ["in-progress", "done"],
       default: "to-do",
     },
-    dueDate: Date,
     completedAt: Date,
   },
-  { timestamps: true, versionKey: false }
+  { versionKey: false }
 );
 
 taskSchema.pre("save", async function () {

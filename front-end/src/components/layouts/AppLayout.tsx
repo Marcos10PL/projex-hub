@@ -1,14 +1,24 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Nav from "../app/Nav";
+import ButtonBack from "../app/Projects/ButtonBack";
 
 export default function AppLayout() {
+  const path = useLocation().pathname.split("/");
+  console.log(path);
   return (
     <>
       <header>
         <Nav />
       </header>
-      <main className="md:w-11/12 lg:w-4/5 xl:w-2/3 mx-auto px-4">
-        <Outlet />
+      <main className="md:w-11/12 lg:w-4/5 xl:w-2/3 mx-auto px-4 md:text-lg">
+        {path[1] === "projects" && path[2] ? (
+          <section className="space-y-5">
+            {!path[3] ? <ButtonBack path="/projects" /> : <ButtonBack />}
+            <Outlet />
+          </section>
+        ) : (
+          <Outlet />
+        )}
       </main>
     </>
   );
