@@ -17,7 +17,7 @@ export default function MainPanel({
   description,
 }: MainPanelProps) {
   return (
-    <div className="space-y-4 bg-slate-900 p-4 rounded-lg border-2 border-slate-700">
+    <div className="space-y-4 p-4 rounded-4xl border-2 border-transparent border-l-gray-400">
       <p className="flex items-center gap-2 text-gray-500">
         Created at {new Date(createdAt).toLocaleDateString()}
         <br className="block md:hidden" />

@@ -8,7 +8,7 @@ type ButtonBackProps = {
 
 export default function ButtonBack({ path }: ButtonBackProps) {
   const navigate = useNavigate();
-  console.log(path);
+
   return (
     <button
       onClick={() => (path ? navigate(path) : navigate(-1))}

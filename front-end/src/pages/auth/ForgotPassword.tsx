@@ -1,16 +1,16 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import Spinner from "../../Spinner";
+import Spinner from "../../components/Spinner";
 import {
   apiResponseSchema,
   ForgotPassowrdForm,
   forgotPasswordSchema,
-} from "../../../utils/zodSchemas";
+} from "../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import ErrorMsg from "../../ErrorMsg";
-import useApi from "../../../utils/myHooks/useApi";
+import ErrorMsg from "../../components/ErrorMsg";
+import useApi from "../../utils/myHooks/useApi";
 
 export default function ForgotPassword() {
   const [success, setSuccess] = useState(false);

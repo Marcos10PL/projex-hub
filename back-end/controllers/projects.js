@@ -98,9 +98,8 @@ const getAllProjects = async (req, res) => {
   if (dueDateBefore) {
     const date = new Date(dueDateBefore);
     date.setUTCHours(23, 59, 59, 999);
-    console.log(date);
 
-    result = result.where("dueDate").lt(date); // do 20 marca     21 marca
+    result = result.where("dueDate").lt(date);
   }
 
   const page = Number(req.query.page) || 1;
@@ -108,7 +107,7 @@ const getAllProjects = async (req, res) => {
   const skip = (page - 1) * limit;
 
   const totalProjects = await Project.countDocuments(result);
-
+  
   result = result.skip(skip).limit(limit);
   const projects = await result;
 
@@ -245,15 +244,15 @@ const deleteProject = async (req, res) => {
 };
 
 const addMember = async (req, res) => {
-  const { id: memberId } = req.body;
-  const userId = req.user._id;
+  const { username: usernameMember } = req.body;
+  const { _id: userId, username } = req.user;
 
-  if (!memberId) throw new BadRequestError("Please provide a member ID");
+  if (!usernameMember) throw new BadRequestError("Please provide a username");
 
-  if (userId.equals(memberId))
+  if (usernameMember === username)
     throw new BadRequestError("You cannot add yourself as a member");
 
-  const member = await User.findById(memberId);
+  const member = await User.findOne({ username: usernameMember });
 
   if (!member) throw new NotFoundError("No user found");
 
@@ -265,23 +264,28 @@ const addMember = async (req, res) => {
   if (!project) throw new NotFoundError("No project found");
 
   const memberExists = project.members.some(member =>
-    member._id.equals(memberId)
+    member._id.equals(member._id)
   );
 
   if (memberExists) throw new BadRequestError("Member already exists");
 
-  project.members.push(memberId);
+  project.members.push(member._id);
   await project.save();
 
   res.status(StatusCodes.OK).json({
     success: true,
     msg: "Member added successfully",
-    project,
   });
 };
 
 const deleteMember = async (req, res) => {
   const memberId = req.params.memberId;
+
+  if (!mongoose.Types.ObjectId.isValid(memberId))
+    throw new BadRequestError("Invalid member ID");
+
+  if (req.user._id.equals(memberId))
+    throw new BadRequestError("You cannot remove yourself as a member");
 
   const member = await User.findById(memberId);
 
@@ -316,8 +320,7 @@ const deleteMember = async (req, res) => {
 const createTask = async (req, res) => {
   const { name, status } = req.body;
 
-  if (!name)
-    throw new BadRequestError("Please provide a name");
+  if (!name) throw new BadRequestError("Please provide a name");
 
   const project = await Project.findOne({
     _id: req.params.id,

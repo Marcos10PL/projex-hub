@@ -42,7 +42,7 @@ export default function Project({ project }: ProjectProps) {
           <p className="row-start-1">{daysUpdated(project.updatedAt)}</p>
         )}
         <div className="flex items-center gap-2 row-start-2">
-          Created by {project.owner.username === user?.username && "you"}
+          Created by {project.owner.username === user?.username ? "you" : project.owner.username}
           <div className="w-2 h-2 bg-gray-400 rounded-full" />
           <p>{new Date(project.createdAt).toLocaleDateString()}</p>
         </div>

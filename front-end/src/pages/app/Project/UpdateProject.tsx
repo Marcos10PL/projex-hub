@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import useApi from "../../../../utils/myHooks/useApi";
+import useApi from "../../../utils/myHooks/useApi";
 import {
   CreateOrUpdateProjectForm,
   createOrUpdateProjectSchema,
   projectResponseSchema,
-} from "../../../../utils/zodSchemas";
+} from "../../../utils/zodSchemas";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import {
@@ -13,11 +13,11 @@ import {
   OptionsStatusNoNull,
   optionsStatusNoNull,
   OptionStatusNoNull,
-} from "../../../../utils/data";
-import ErrorMsg from "../../../ErrorMsg";
-import SelectDueDate from "../../../app/Projects/SelectDueDay";
-import useProject from "../../../../utils/myHooks/useProject";
-import Spinner from "../../../Spinner";
+} from "../../../utils/data";
+import ErrorMsg from "../../../components/ErrorMsg";
+import SelectDueDate from "../../../components/app/Projects/SelectDueDay";
+import useProject from "../../../utils/myHooks/useProject";
+import Spinner from "../../../components/Spinner";
 import { useEffect, useState } from "react";
 
 export default function UpdateProject() {

@@ -87,6 +87,10 @@ export const createOrUpdateProjectSchema = projectSchema.pick({
   description: true,
 });
 
+export const addMemberSchema = user.pick({
+  username: true,
+});
+
 export type ForgotPassowrdForm = z.infer<typeof forgotPasswordSchema>;
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
@@ -95,6 +99,7 @@ export type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 export type CreateOrUpdateProjectForm = z.infer<
   typeof createOrUpdateProjectSchema
 >;
+export type AddMemberForm = z.infer<typeof addMemberSchema>;
 
 //----------- api response ---------- //
 

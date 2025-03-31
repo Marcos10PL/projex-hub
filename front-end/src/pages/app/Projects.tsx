@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
-import Spinner from "../../Spinner";
-import SelectDueDate from "../../app/Projects/SelectDueDay";
+import Spinner from "../../components/Spinner";
+import SelectDueDate from "../../components/app/Projects/SelectDueDay";
 import {
   customStyles,
   OptionDueDate,
@@ -13,9 +13,12 @@ import {
   optionsStatus,
   OptionsStatus,
   OptionStatus,
-} from "../../../utils/data";
-import Project from "../../app/Projects/Project";
-import useProjects from "../../../utils/myHooks/useProjects";
+  ProjectParams,
+} from "../../utils/data";
+import Project from "../../components/app/Projects/Project";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../state/store";
+import { fetchProjects } from "../../state/projects/projectsThunk";
 
 export default function Projects() {
   const [selectedStatus, setSelectedStatus] = useState<OptionsStatus>();
@@ -24,13 +27,34 @@ export default function Projects() {
   const [selectedDueDayBefore, setSelectedDueDayBefore] = useState<Date>();
   const [selectedDueDayAfter, setSelectedDueDayAfter] = useState<Date>();
 
-  const { projects, loading } = useProjects({
+  const { projects, loading } = useSelector(
+    (state: RootState) => state.projects
+  );
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    const filters: ProjectParams = {
+      status: selectedStatus,
+      sort: selectedSort,
+      dueDate: selectedDueDate,
+      dueDateBefore: selectedDueDayBefore,
+      dueDateAfter: selectedDueDayAfter,
+    };
+
+    dispatch(fetchProjects(filters));
+  }, [
+    dispatch,
     selectedStatus,
     selectedSort,
     selectedDueDate,
     selectedDueDayBefore,
     selectedDueDayAfter,
-  });
+  ]);
+
+  useEffect(() => {
+    if (selectedDueDayBefore) setSelectedDueDate(null);
+    if (selectedDueDayAfter) setSelectedDueDate(null);
+  }, [selectedDueDayBefore, selectedDueDayAfter]);
 
   useEffect(() => {
     if (selectedDueDate) {
@@ -38,11 +62,6 @@ export default function Projects() {
       setSelectedDueDayAfter(undefined);
     }
   }, [selectedDueDate]);
-
-  useEffect(() => {
-    if (selectedDueDayBefore) setSelectedDueDate(null);
-    if (selectedDueDayAfter) setSelectedDueDate(null);
-  }, [selectedDueDayBefore, selectedDueDayAfter]);
 
   return (
     <>
@@ -101,7 +120,11 @@ export default function Projects() {
       <div className="border-t-2 border-dashed my-6 md:my-8" />
 
       {/* PROJECTS */}
-      {!loading ? (
+      {(!loading && projects?.length === 0) || !projects ? (
+        <div className="text-center text-2xl font-bold text-gray-500 py-10">
+          Projects not found
+        </div>
+      ) : !loading ? (
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map(project => (
             <Project key={project._id} project={project} />

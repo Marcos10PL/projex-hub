@@ -24,6 +24,10 @@ export default function useApi<T>(
     };
   }, [customErrors]);
 
+  const setErrorMessage = useCallback((message: string) => {
+    setErrorMsg(message);
+  }, []);
+
   const fetchData = useCallback(
     async (options?: AxiosRequestConfig) => {
       setLoading(true);
@@ -35,11 +39,11 @@ export default function useApi<T>(
           ...options,
           method,
         });
-        
-        const dataRes = schema.safeParse(res.data);
 
-        if (!dataRes.success) console.log(dataRes.error);
-        return dataRes.data;
+        const dataRes = schema.safeParse(res.data);
+        if (dataRes.success) return dataRes.data;
+
+        console.log(dataRes.error);
       } catch (err) {
         const { response } = err as AxiosError<T>;
 
@@ -56,5 +60,5 @@ export default function useApi<T>(
     [url, schema, method, errors]
   );
 
-  return { loading, errorMsg, fetchData } as const;
+  return { loading, errorMsg, fetchData, setErrorMessage } as const;
 }

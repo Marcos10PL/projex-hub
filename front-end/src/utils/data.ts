@@ -109,13 +109,14 @@ export const customStyles = <T extends OptionType>(): StylesConfig<
 });
 
 // ------------ project params ------------//
+
 export type ProjectParams = {
-  status?: OptionsStatus | undefined;
-  sort?: OptionsSort | undefined;
-  dueDate?: OptionsDueDate | undefined;
-  dueDateBefore?: string | undefined;
-  dueDateAfter?: string | undefined;
-  page?: number | undefined;
-  limit?: number | undefined;
-  search?: string | undefined;
+  status?: OptionsStatus;
+  sort?: OptionsSort;
+  dueDate?: OptionsDueDate;
+  dueDateBefore?: Date | null;
+  dueDateAfter?: Date | null;
+  page?: number | null;
+  limit?: number | null;
+  search?: string | null;
 };

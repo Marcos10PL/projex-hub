@@ -6,10 +6,10 @@ import {
   apiResponseSchema,
   ResetPasswordForm,
   resetPasswordSchema,
-} from "../../../utils/zodSchemas";
-import ErrorMsg from "../../ErrorMsg";
-import Spinner from "../../Spinner";
-import useApi from "../../../utils/myHooks/useApi";
+} from "../../utils/zodSchemas";
+import ErrorMsg from "../../components/ErrorMsg";
+import Spinner from "../../components/Spinner";
+import useApi from "../../utils/myHooks/useApi";
 
 export default function ResetPassword() {
   const { token } = useParams();

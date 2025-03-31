@@ -1,10 +1,10 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Nav from "../app/Nav";
-import ButtonBack from "../app/Projects/ButtonBack";
+import Nav from "../components/app/Nav";
+import ButtonBack from "../components/app/Projects/ButtonBack";
 
 export default function AppLayout() {
   const path = useLocation().pathname.split("/");
-  console.log(path);
+  
   return (
     <>
       <header>

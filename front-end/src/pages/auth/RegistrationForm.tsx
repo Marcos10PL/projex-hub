@@ -5,14 +5,14 @@ import {
   RegisterForm,
   registerResponseSchema,
   registerSchema,
-} from "../../../utils/zodSchemas";
+} from "../../utils/zodSchemas";
 import { useCallback, useState } from "react";
 
 import clsx from "clsx";
-import Spinner from "../../Spinner";
-import ErrorMsg from "../../ErrorMsg";
-import { resendEmail } from "../../../utils/utils";
-import useApi from "../../../utils/myHooks/useApi";
+import Spinner from "../../components/Spinner";
+import ErrorMsg from "../../components/ErrorMsg";
+import { resendEmail } from "../../utils/utils";
+import useApi from "../../utils/myHooks/useApi";
 
 export default function RegistrationForm() {
   const [email, setEmail] = useState("");

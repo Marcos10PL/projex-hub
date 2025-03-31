@@ -3,16 +3,16 @@ import {
   UpdateProfileForm,
   updateProfileResponseSchema,
   updateProfileSchema,
-} from "../../../utils/zodSchemas";
-import ErrorMsg from "../../ErrorMsg";
+} from "../../utils/zodSchemas";
+import ErrorMsg from "../../components/ErrorMsg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../state/store";
 import { useCallback, useState } from "react";
-import Spinner from "../../Spinner";
-import { resendEmail } from "../../../utils/utils";
-import useApi from "../../../utils/myHooks/useApi";
+import Spinner from "../../components/Spinner";
+import { resendEmail } from "../../utils/utils";
+import useApi from "../../utils/myHooks/useApi";
+import { RootState } from "../../state/store";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);

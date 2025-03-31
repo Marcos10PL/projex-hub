@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../../utils/axiosConfig";
-import Spinner from "../Spinner";
-import { apiResponseSchema } from "../../utils/zodSchemas";
+import API from "../utils/axiosConfig";
+import Spinner from "../components/Spinner";
+import { apiResponseSchema } from "../utils/zodSchemas";
 
 export default function ConfirmEmail() {
   const { token } = useParams();

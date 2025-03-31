@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom";
-import Logo from "../Logo";
+import Logo from "../components/Logo";
 
-export default function HomeLayout() {
+export default function AuthLayout() {
   return (
     <>
       <header className="text-center my-8 text-4xl">
         <Logo />
       </header>
-      <main className="md:w-2/3 mx-auto px-4">
+      <main className="max-w-sm mx-auto px-4">
         <Outlet />
       </main>
     </>

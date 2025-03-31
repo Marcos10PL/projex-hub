@@ -1,17 +1,17 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentUser } from "../../../state/current-user/currentUserSlice";
+import { setCurrentUser } from "../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   type LoginForm,
   loginResponseSchema,
   loginSchema,
-} from "../../../utils/zodSchemas";
+} from "../../utils/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Spinner from "../../Spinner";
+import Spinner from "../../components/Spinner";
 import clsx from "clsx";
-import ErrorMsg from "../../ErrorMsg.tsx";
-import useApi from "../../../utils/myHooks/useApi.ts";
+import ErrorMsg from "../../components/ErrorMsg";
+import useApi from "../../utils/myHooks/useApi.ts";
 
 export default function LoginForm() {
   const dispatch = useDispatch();

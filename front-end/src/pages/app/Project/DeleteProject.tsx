@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
-import useApi from "../../../../utils/myHooks/useApi";
-import { apiResponseSchema } from "../../../../utils/zodSchemas";
-import Spinner from "../../../Spinner";
-import ErrorMsg from "../../../ErrorMsg";
+import useApi from "../../../utils/myHooks/useApi";
+import { apiResponseSchema } from "../../../utils/zodSchemas";
+import Spinner from "../../../components/Spinner";
+import ErrorMsg from "../../../components/ErrorMsg";
 
 export default function DeleteProject() {
   const { id } = useParams<{ id: string }>();
