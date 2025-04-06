@@ -12,6 +12,7 @@ type TasksProps = {
 
 export default function Tasks({ tasks, owner }: TasksProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
+
   const projectOwner = user?._id === owner._id;
 
   return (
@@ -29,18 +30,18 @@ export default function Tasks({ tasks, owner }: TasksProps) {
 
         <div className="flex items-center flex-wrap gap-2">
           {projectOwner && (
-            <button
-              type="button"
-              className="flex items-center justify-center px-10 h-13 w-full md:w-fit mb-2 md:mb-0 rounded-lg bg-gray-700 border-2 border-violet-400 hover:bg-gray-600 transition-colors cursor-pointer shadow-[0_0_5px_3px_#222] active:bg-gray-600"
-              onClick={() => console.log("Add member")}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </button>
+            <>
+              <button
+                type="button"
+                className="flex items-center justify-center px-10 h-13 w-full md:w-fit mb-2 md:mb-0 rounded-lg bg-gray-700 border-2 border-violet-400 hover:bg-gray-600 transition-colors cursor-pointer shadow-[0_0_5px_3px_#222] active:bg-gray-600"
+                onClick={() => console.log('object')}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
+            </>
           )}
           {tasks.map(task => (
-            <>
-              <Task key={task._id} task={task} owner={owner} />
-            </>
+            <Task key={task._id} task={task} owner={owner} />
           ))}
         </div>
       </>

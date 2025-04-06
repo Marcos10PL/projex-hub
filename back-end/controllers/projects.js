@@ -107,7 +107,7 @@ const getAllProjects = async (req, res) => {
   const skip = (page - 1) * limit;
 
   const totalProjects = await Project.countDocuments(result);
-  
+
   result = result.skip(skip).limit(limit);
   const projects = await result;
 
@@ -180,9 +180,10 @@ const updateProject = async (req, res) => {
   const { name, description, status } = req.body;
   let { dueDate } = req.body;
 
-  dueDate = dueDate ? new Date(dueDate) : null;
+  // dueDate can be null if the user wants to remove it
+  if (dueDate !== null) dueDate = dueDate ? new Date(dueDate) : undefined;
 
-  if (!name && !description && !status && !dueDate)
+  if (!name && !description && !status && dueDate === undefined)
     throw new BadRequestError("Please provide at least one field to update");
 
   const project = await Project.findOne({
@@ -213,7 +214,12 @@ const updateProject = async (req, res) => {
     state = true;
   }
 
-  if (dueDate && dueDate !== project.dueDate) {
+  if (dueDate === null) {
+    project.dueDate = null;
+    state = true;
+  }
+
+  if (dueDate !== undefined && dueDate !== project.dueDate) {
     project.dueDate = dueDate;
     state = true;
   }
@@ -275,6 +281,7 @@ const addMember = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     msg: "Member added successfully",
+    project,
   });
 };
 

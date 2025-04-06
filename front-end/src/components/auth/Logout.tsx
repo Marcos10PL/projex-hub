@@ -1,7 +1,6 @@
 import API from "../../utils/axiosConfig";
 import { clearCurrentUser } from "../../state/current-user/currentUserSlice";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Spinner from "../Spinner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,25 +8,22 @@ import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 export default function Logout() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const logout = async () => {
     try {
       setLoading(true);
       await API.post("auth/logout");
-      dispatch(clearCurrentUser());
-      navigate("/login", { replace: true });
-      // eslint-disable-next-line
     } catch (error) {
-      //console.error(error);
+      console.error(error);
     } finally {
+      dispatch(clearCurrentUser(null));
       setLoading(false);
     }
   };
 
   return (
-    <button onClick={logout} className="flex flex-col items-center px-5 link">
+    <button onClick={logout} className="flex flex-col items-center px-5 link cursor-pointer">
       {loading ? (
         <Spinner size={2} />
       ) : (

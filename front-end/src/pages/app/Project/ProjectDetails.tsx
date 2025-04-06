@@ -15,8 +15,8 @@ export default function ProjectDetails() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    if (id) dispatch(fetchProject(id));
-  }, [id, dispatch]);
+    if (id && project?._id !== id) dispatch(fetchProject(id));
+  }, [id, dispatch, project]);
 
   if (loading) return <Spinner size={2} />;
 
@@ -38,7 +38,11 @@ export default function ProjectDetails() {
         dueDate={project.dueDate}
       />
 
-      <Members owner={project.owner} members={project.members} />
+      <Members
+        id={project._id}
+        owner={project.owner}
+        members={project.members}
+      />
 
       <Tasks tasks={project.tasks} owner={project.owner} />
     </>

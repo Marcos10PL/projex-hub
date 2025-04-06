@@ -1,17 +1,20 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import API from "../../utils/axiosConfig";
 import { User } from "../../utils/zodSchemas";
+import { AxiosError } from "axios";
 
 type CurrentUserState = {
   currentUser: User | null;
   isAuthenticated: boolean;
   loading: boolean;
+  error: string | null;
 };
 
 const initialState: CurrentUserState = {
   currentUser: null,
   isAuthenticated: false,
   loading: true,
+  error: null,
 };
 
 const currentUserSlice = createSlice({
@@ -22,9 +25,10 @@ const currentUserSlice = createSlice({
       state.currentUser = action.payload;
       state.isAuthenticated = true;
     },
-    clearCurrentUser(state) {
+    clearCurrentUser(state, action: PayloadAction<string | null>) {
       state.currentUser = null;
       state.isAuthenticated = false;
+      state.error = action.payload;
     },
   },
   extraReducers: builder => {
@@ -33,11 +37,13 @@ const currentUserSlice = createSlice({
         state.currentUser = action.payload;
         state.isAuthenticated = action.payload !== null;
         state.loading = false;
+        state.error = null;
       })
-      .addCase(checkAuth.rejected, state => {
+      .addCase(checkAuth.rejected, (state, action) => {
         state.currentUser = null;
         state.isAuthenticated = false;
         state.loading = false;
+        state.error = action.error.message as string;
       });
   },
 });
@@ -46,9 +52,15 @@ export const checkAuth = createAsyncThunk("currentUser/checkAuth", async () => {
   try {
     const res = await API.get("auth/check");
     return res.data.user;
-    // eslint-disable-next-line
   } catch (error) {
-    return null;
+    const axiosError = error as AxiosError;
+    
+    if (axiosError.message === "Network Error") {
+      throw new Error(
+        "Network Error. Probably too many requests. Try again later."
+      );
+    }
+    throw new Error();
   }
 });
 

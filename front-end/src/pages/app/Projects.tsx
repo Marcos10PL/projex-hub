@@ -40,8 +40,7 @@ export default function Projects() {
       dueDateBefore: selectedDueDayBefore,
       dueDateAfter: selectedDueDayAfter,
     };
-
-    dispatch(fetchProjects(filters));
+    if (filters) dispatch(fetchProjects(filters));
   }, [
     dispatch,
     selectedStatus,

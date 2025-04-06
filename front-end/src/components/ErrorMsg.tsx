@@ -1,5 +1,5 @@
 type ErrorProps = {
-  message: string | undefined;
+  message: string | undefined | null;
 };
 
 export default function ErrorMsg({ message }: ErrorProps) {

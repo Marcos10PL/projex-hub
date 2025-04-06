@@ -1,11 +1,14 @@
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ProjectType } from "../../../../utils/zodSchemas";
 import { statusColor } from "../../../../utils/data";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import clsx from "clsx";
-import { RootState } from "../../../../state/store";
+import { AppDispatch, RootState } from "../../../../state/store";
+import DeleteAlert from "../../../DeleteAlert";
+import { useState } from "react";
+import { deleteProject } from "../../../../state/project/projectThunk";
 
 type TopPanelProps = {
   id: ProjectType["_id"];
@@ -15,6 +18,18 @@ type TopPanelProps = {
 
 export default function TopPanel({ id, status, owner }: TopPanelProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
+  const { loading } = useSelector((state: RootState) => state.project);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const navigate = useNavigate();
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleDelete = async () => {
+    dispatch(deleteProject(id));
+    navigate("/projects", { replace: true });
+  };
+
   const projectOwner = user?._id === owner._id;
 
   return (
@@ -24,11 +39,13 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
         projectOwner ? "justify-between" : "justify-center"
       )}
     >
+      {/* STATUS */}
       <div className="flex items-center gap-2">
         <div className={`${statusColor[status]} w-4 h-4 rounded-full`} />
         <span className="uppercase">{status}</span>
       </div>
 
+      {/* BUTTONS */}
       {projectOwner && (
         <div className="flex gap-5">
           <NavLink
@@ -38,15 +55,25 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
             <span>Edit</span>
             <FontAwesomeIcon icon={faEdit} />
           </NavLink>
-          <NavLink
-            to={`/projects/${id}/delete`}
+          <button
             className="flex items-center gap-2 text-red-400 cursor-pointer hover:text-red-300 transition-colors active:text-red-300"
+            onClick={() => setIsOpen(true)}
           >
             <span>Delete</span>
             <FontAwesomeIcon icon={faTrash} />
-          </NavLink>
+          </button>
         </div>
       )}
+
+      <DeleteAlert
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        handleDelete={handleDelete}
+        message="this project"
+        loading={loading}
+      />
     </div>
   );
 }
+
+

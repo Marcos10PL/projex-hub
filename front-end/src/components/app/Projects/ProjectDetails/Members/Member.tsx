@@ -1,40 +1,33 @@
 import { faTrash, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  apiResponseSchema,
-  ProjectType,
-} from "../../../../../utils/zodSchemas";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../state/store";
-import useApi from "../../../../../utils/myHooks/useApi";
+import { ProjectType } from "../../../../../utils/zodSchemas";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../../state/store";
 import { useState } from "react";
-import Spinner from "../../../../Spinner";
-import { useParams } from "react-router-dom";
+import DeleteAlert from "../../../../DeleteAlert";
+import { removeMember } from "../../../../../state/project/membersThunk";
 
 type MemberProps = {
+  id: ProjectType["_id"];
   member: ProjectType["members"][number];
   owner: ProjectType["owner"];
   isOwner?: true;
 };
 
-export default function Member({ member, isOwner, owner }: MemberProps) {
-  const { id } = useParams<{ id: string }>();
-
+export default function Member({ id, member, isOwner, owner }: MemberProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
-  const projectOwner = user?._id === owner._id;
-  const you = user?._id === member._id;
+  const { loadingMembers, error } = useSelector(
+    (state: RootState) => state.project
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { loading, fetchData } = useApi(
-    `/projects/${id}/members/${member._id}`,
-    apiResponseSchema,
-    "delete"
-  );
+  const projectOwner = user?._id === owner._id;
+  const you = user?._id === member._id;
 
-  const handleDelete = async () => {
-    const res = await fetchData();
-    if (res?.success) setIsOpen(false);
+  const handleDelete = () => {
+    dispatch(removeMember({ id, memberId: member._id }));
   };
 
   return (
@@ -58,28 +51,14 @@ export default function Member({ member, isOwner, owner }: MemberProps) {
         </button>
       )}
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black/20 backdrop-blur-sm">
-          <div className="bg-gray-800 border-2 border-gray-700 p-5 rounded-lg shadow-lg flex flex-col items-center gap-3 text-text w-5/6 md:w-fit">
-            <p>
-              Are you sure you want to remove{" "}
-              <span className="text-emerald-100">{member.username}</span> from
-              your project?
-            </p>
-            <div className="flex gap-3 *:uppercase *:font-bold *:px-3 *:py-1.5 *:transition-colors *:cursor-pointer *:active:bg-gray-700 *:rounded-lg *:hover:bg-gray-700">
-              <button
-                className="cursor-pointer text-red-400"
-                onClick={handleDelete}
-              >
-                {loading ? <Spinner size={1} /> : "delete"}
-              </button>
-              <button className="text-text" onClick={() => setIsOpen(false)}>
-                cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteAlert
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        handleDelete={handleDelete}
+        message={`"${member.username}" from your project`}
+        loading={loadingMembers}
+        error={error}
+      />
     </div>
   );
 }

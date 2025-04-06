@@ -19,10 +19,10 @@ import Home from "./pages/app/Home";
 import ProjectDetails from "./pages/app/Project/ProjectDetails";
 import Projects from "./pages/app/Projects";
 import UpdateProject from "./pages/app/Project/UpdateProject";
-import DeleteProject from "./pages/app/Project/DeleteProject";
+import ErrorMsg from "./components/ErrorMsg";
 
 export default function App() {
-  const { isAuthenticated, loading } = useSelector(
+  const { isAuthenticated, loading, error } = useSelector(
     (state: RootState) => state.currentUser
   );
 
@@ -64,7 +64,6 @@ export default function App() {
                 <Route path=":id">
                   <Route index element={<ProjectDetails />} />
                   <Route path="update" element={<UpdateProject />} />
-                  <Route path="delete" element={<DeleteProject />} />
                 </Route>
                 <Route path="create" element={<ProjectDetails />} />
               </Route>
@@ -79,6 +78,8 @@ export default function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Route>
       </Routes>
+
+      <ErrorMsg message={error} />
 
       <Footer />
     </>

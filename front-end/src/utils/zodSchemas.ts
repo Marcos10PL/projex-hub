@@ -32,7 +32,10 @@ export const userSchema = user.merge(
 
 export const taskSchema = z.object({
   _id: z.string(),
-  name: z.string(),
+  name: z
+    .string()
+    .min(3, "Name must be between 3 and 30 characters long")
+    .max(30, "Name must be between 3 and 30 characters long"),
   status: z.enum(["in-progress", "done"]),
   completedAt: z.string().nullish(),
 });
@@ -91,6 +94,10 @@ export const addMemberSchema = user.pick({
   username: true,
 });
 
+export const addTaskSchema = taskSchema.pick({
+  name: true,
+});
+
 export type ForgotPassowrdForm = z.infer<typeof forgotPasswordSchema>;
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
@@ -100,6 +107,7 @@ export type CreateOrUpdateProjectForm = z.infer<
   typeof createOrUpdateProjectSchema
 >;
 export type AddMemberForm = z.infer<typeof addMemberSchema>;
+export type AddTaskForm = z.infer<typeof addTaskSchema>;
 
 //----------- api response ---------- //
 

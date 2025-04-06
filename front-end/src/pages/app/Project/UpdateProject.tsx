@@ -1,10 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import useApi from "../../../utils/myHooks/useApi";
 import {
   CreateOrUpdateProjectForm,
   createOrUpdateProjectSchema,
-  projectResponseSchema,
 } from "../../../utils/zodSchemas";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
@@ -16,27 +14,25 @@ import {
 } from "../../../utils/data";
 import ErrorMsg from "../../../components/ErrorMsg";
 import SelectDueDate from "../../../components/app/Projects/SelectDueDay";
-import useProject from "../../../utils/myHooks/useProject";
 import Spinner from "../../../components/Spinner";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../state/store";
+import { updateProject } from "../../../state/project/projectThunk";
 
 export default function UpdateProject() {
   const { id } = useParams<{ id: string }>();
-
-  const { project, loading } = useProject({ id });
   const navigate = useNavigate();
 
   const [selectedDueDate, setSelectedDueDate] = useState<Date>();
   const [status, setStatus] = useState<OptionsStatusNoNull>();
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const {
-    loading: updateLoading,
-    fetchData,
-    errorMsg,
-  } = useApi("projects/" + id, projectResponseSchema, "patch", {
-    404: "Project not found.",
-  });
+  const { loading, project, error } = useSelector(
+    (state: RootState) => state.project
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     setSelectedDueDate(
@@ -57,10 +53,10 @@ export default function UpdateProject() {
     setMessage("");
 
     if (
-      selectedDueDate?.toISOString() === project?.dueDate &&
+      selectedDueDate?.toISOString() == project?.dueDate &&
       status === project?.status &&
-      dataForm.name === project?.name &&
-      dataForm.description === project?.description
+      dataForm.name.trim() === project?.name &&
+      dataForm.description.trim() === project?.description
     ) {
       setMessage("No changes made.");
       return;
@@ -69,16 +65,18 @@ export default function UpdateProject() {
     const data = {
       ...dataForm,
       status,
-      dueDate: selectedDueDate?.toISOString(),
+      dueDate: selectedDueDate ? selectedDueDate?.toISOString() : null,
     };
 
-    const res = await fetchData({ data });
-    if (res) {
-      navigate("/projects/" + res.project._id);
-    }
+    if (id) {
+      dispatch(updateProject({ id, projectData: data }));
+      setSuccess(true);
+    } 
   };
 
-  if (loading) return <Spinner size={2} />;
+  useEffect(() => {
+    if (!loading && !error && success) navigate(`/projects/${id}`);
+  }, [loading, error, navigate, id, success]);
 
   if (!project) return <p className="text-center">Project not found</p>;
 
@@ -127,10 +125,10 @@ export default function UpdateProject() {
       </div>
 
       <button type="submit" className="button w-40 h-12">
-        {updateLoading ? <Spinner size={2} /> : "Update project"}
+        {loading ? <Spinner size={2} /> : "Update project"}
       </button>
 
-      <ErrorMsg message={errorMsg || message} />
+      <ErrorMsg message={error || message} />
     </form>
   );
 }

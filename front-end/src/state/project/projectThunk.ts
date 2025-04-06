@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../../utils/axiosConfig";
 import { projectResponseSchema, ProjectType } from "../../utils/zodSchemas";
+import { AxiosError } from "axios";
 
 export const fetchProject = createAsyncThunk(
   "project/fetchProject",
@@ -24,8 +25,10 @@ export const fetchProject = createAsyncThunk(
 );
 
 type ProjectArgs = {
-  id: string;
-  projectData: Pick<ProjectType, "name" | "description" | "status" | "dueDate">;
+  id: ProjectType["_id"];
+  projectData: Partial<
+    Pick<ProjectType, "name" | "description" | "status" | "dueDate">
+  >;
 };
 
 export const createProject = createAsyncThunk(
@@ -53,7 +56,7 @@ export const updateProject = createAsyncThunk(
   "project/updateProject",
   async ({ id, projectData }: ProjectArgs, { rejectWithValue }) => {
     try {
-      const response = await API.put(`/projects/${id}`, projectData);
+      const response = await API.patch(`/projects/${id}`, projectData);
 
       const parsedDate = projectResponseSchema.safeParse(response.data);
 
@@ -63,6 +66,28 @@ export const updateProject = createAsyncThunk(
       }
 
       return parsedDate.data.project;
+    } catch (error) {
+      const err = error as AxiosError;
+
+      if (err.response?.status === 400) {
+        return rejectWithValue("Project already exists with this name");
+      }
+      return rejectWithValue("Server error. Please try again later.");
+    }
+  }
+);
+
+export const deleteProject = createAsyncThunk(
+  "project/deleteProject",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await API.delete(`/projects/${id}`);
+
+      if (response.status !== 200) {
+        return rejectWithValue("Something went wrong. Please try again later.");
+      }
+
+      return id;
     } catch (error) {
       console.error(error);
       return rejectWithValue("Server error. Please try again later.");
