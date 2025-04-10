@@ -1,6 +1,9 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentUser } from "../../state/current-user/currentUserSlice";
+import {
+  clearCurrentUser,
+  setCurrentUser,
+} from "../../state/current-user/currentUserSlice";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   type LoginForm,
@@ -34,6 +37,7 @@ export default function LoginForm() {
     const res = await fetchData({ data });
 
     if (res?.success) {
+      dispatch(clearCurrentUser(null));
       dispatch(setCurrentUser(res.user));
       navigate("/");
     }
@@ -73,7 +77,7 @@ export default function LoginForm() {
             loading && "pointer-events-none opacity-80"
           )}
         >
-          {loading ? <Spinner size={1.5} /> : "Login"}
+          {loading ? <Spinner size={1.5} /> : "Log in"}
         </button>
       </form>
 

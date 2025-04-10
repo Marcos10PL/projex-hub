@@ -120,3 +120,5 @@ export type ProjectParams = {
   limit?: number | null;
   search?: string | null;
 };
+
+export const MAX_TASKS = 50;

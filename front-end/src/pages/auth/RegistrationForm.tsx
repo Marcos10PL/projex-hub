@@ -50,7 +50,7 @@ export default function RegistrationForm() {
           dangerouslySetInnerHTML={{ __html: message }}
         />
         <NavLink to="/login" className="link">
-          Back to login
+          Back to log in
         </NavLink>
       </div>
     );
@@ -74,7 +74,7 @@ export default function RegistrationForm() {
           recover your account if you forget or lose your password.
         </p>
         <NavLink to="/login" className="link">
-          You can login now!
+          You can log in now!
         </NavLink>
       </div>
     );
@@ -136,7 +136,7 @@ export default function RegistrationForm() {
 
       <div className="my-3 flex flex-col items-center gap-2">
         <NavLink to="/login" className="link">
-          Already have an account? Login now!
+          Already have an account? Log in now!
         </NavLink>
       </div>
     </>

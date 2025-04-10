@@ -357,7 +357,7 @@ const updateTask = async (req, res) => {
   const taskId = req.params.taskId;
   const userId = req.user._id;
 
-  if (!name && !description && !status)
+  if (!name && !status)
     throw new BadRequestError("Please provide at least one field to update");
 
   const task = await Task.findById(taskId);
@@ -414,7 +414,7 @@ const updateTask = async (req, res) => {
   res.status(StatusCodes.OK).json({
     success: true,
     msg: "Task updated successfully",
-    updatedProject,
+    project: updatedProject,
   });
 };
 

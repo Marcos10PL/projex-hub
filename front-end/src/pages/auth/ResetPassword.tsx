@@ -54,7 +54,7 @@ export default function ResetPassword() {
         </div>
         <div className="text-center">
           <NavLink to="/login" className="link">
-            Back to login
+            Back to log in
           </NavLink>
         </div>
       </>

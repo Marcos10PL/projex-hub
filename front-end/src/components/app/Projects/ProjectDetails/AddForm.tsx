@@ -8,9 +8,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../../state/store";
-import { addMember } from "../../../../state/project/membersThunk";
+import {
+  addMember,
+  AddMemberArgs,
+} from "../../../../state/project/membersThunk";
+import { clearError } from "../../../../state/project/projectSlice";
+import { addTask, AddTaskArgs } from "../../../../state/project/tasksThunk";
+import clsx from "clsx";
 
-type Props<T extends FieldValues, A extends typeof addMember> = {
+type AsyncThunk = typeof addMember | typeof addTask;
+
+type Props<T extends FieldValues, A extends AsyncThunk> = {
   id: ProjectType["_id"];
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,10 +30,7 @@ type Props<T extends FieldValues, A extends typeof addMember> = {
   asyncThunk: A;
 };
 
-export default function AddForm<
-  T extends FieldValues,
-  A extends typeof addMember,
->({
+export default function AddForm<T extends FieldValues, A extends AsyncThunk>({
   id,
   isOpen,
   setIsOpen,
@@ -51,17 +56,27 @@ export default function AddForm<
   });
 
   const onSubmit: SubmitHandler<T> = async data => {
-    const args = { id, [fieldName]: data[fieldName] } as Parameters<A>[0];
-    dispatch(asyncThunk(args));
+    const args = { id, [fieldName]: data[fieldName] };
+
+    if (asyncThunk === addMember) {
+      const memberArgs = args as AddMemberArgs;
+      dispatch(asyncThunk(memberArgs));
+    }
+
+    if (asyncThunk === addTask) {
+      const taskArgs = args as AddTaskArgs;;
+      dispatch(asyncThunk(taskArgs));
+    }
     setSuccess(true);
   };
 
   const handleClose = useCallback(() => {
-    setIsOpen(false);
+    dispatch(clearError());
     setErrorMessage("");
+    setIsOpen(false);
     setSuccess(false);
     reset();
-  }, [setIsOpen, reset]);
+  }, [setIsOpen, reset, dispatch]);
 
   useEffect(() => {
     if (!loading && !error && success) handleClose();
@@ -72,6 +87,7 @@ export default function AddForm<
     if (isOpen) setFocus(fieldName);
   }, [isOpen, setFocus, fieldName]);
 
+  // FORM
   if (isOpen)
     return (
       <section className="relative w-full md:w-fit">
@@ -106,11 +122,11 @@ export default function AddForm<
           </button>
         </form>
 
-        {(errorMsg || errors.username?.message) && (
+        {(errorMsg || errors[fieldName]?.message) && (
           <>
             {/* ALERT BOX */}
             <div className="absolute -top-9 left-1/2 transform -translate-1/2 border-2 w-full text-center bg-gray-900 rounded-lg p-2 text-red-400 font-bold z-10 h-16 flex items-center justify-center gap-2">
-              {(errors.username?.message as string) || errorMsg}
+              {(errors[fieldName]?.message as string) || errorMsg}
             </div>
 
             {/* ALERT ARROW */}
@@ -119,4 +135,18 @@ export default function AddForm<
         )}
       </section>
     );
+
+  // BUTTON
+  return (
+    <button
+      type="button"
+      className={clsx(
+        "flex items-center justify-center h-13 my-2 px-10 rounded-lg bg-gray-700 w-full md:w-fit border-2 hover:bg-gray-600 transition-colors cursor-pointer shadow-[0_0_2px_2px_#113233] active:bg-gray-600 py-3",
+        asyncThunk === addMember ? "border-emerald-400" : "border-violet-400"
+      )}
+      onClick={() => setIsOpen(!isOpen)}
+    >
+      <FontAwesomeIcon icon={faPlus} />
+    </button>
+  );
 }

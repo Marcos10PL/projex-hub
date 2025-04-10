@@ -20,7 +20,7 @@ export default function ForgotPassword() {
     apiResponseSchema,
     "post",
     {
-      400: "Your address is not verified. <br /> Please login and verify your email address.",
+      400: "Your address is not verified. <br /> Please log in and verify your email address.",
       404: "No user found with this email address.",
     }
   );
@@ -81,7 +81,7 @@ export default function ForgotPassword() {
 
       <div className="my-6 text-center">
         <NavLink to="/login" className="link">
-          Back to login
+          Back to log in
         </NavLink>
       </div>
     </>

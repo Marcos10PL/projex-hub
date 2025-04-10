@@ -10,21 +10,37 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../../state/store";
 import DeleteAlert from "../../../../DeleteAlert";
 import { useState } from "react";
+import {
+  deleteTask,
+  updateTask,
+} from "../../../../../state/project/tasksThunk";
+import Spinner from "../../../../Spinner";
 
 type TaskProps = {
+  id: ProjectType["_id"];
   task: ProjectType["tasks"][number];
   owner: ProjectType["owner"];
 };
 
-export default function Task({ task, owner }: TaskProps) {
+export default function Task({ id, task, owner }: TaskProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
+  const { loadingTasks, loadingTask, error } = useSelector(
+    (state: RootState) => state.project
+  );
   const dispatch = useDispatch<AppDispatch>();
+
   const [isOpen, setIsOpen] = useState(false);
+
   const projectOwner = user?._id === owner._id;
+  const isThisTaskLoading = loadingTask === task._id;
 
   const handleDelete = () => {
-    dispatch(deleteTask({ id: task._id, projectId: task.projectId }));
-    setIsOpen(false);
+    dispatch(deleteTask({ id, taskId: task._id }));
+  };
+
+  const handleUpdateTask = () => {
+    const newStatus = task.status === "done" ? "in-progress" : "done";
+    dispatch(updateTask({ id, taskId: task._id, status: newStatus }));
   };
 
   return (
@@ -48,9 +64,11 @@ export default function Task({ task, owner }: TaskProps) {
 
         {/* BUTTONS */}
         {projectOwner && (
-          <div className="flex gap-2 *:px-3 *:py-1.5 *:bg-gray-900 *:rounded-lg *:hover:bg-gray-700 *:transition-colors *:cursor-pointer *:active:bg-gray-700">
-            <button className="text-green-300">
-              {task.status === "done" ? (
+          <div className="flex gap-2 *:px-3 *:py-1.5 *:bg-gray-900 *:rounded-lg *:hover:bg-gray-700 *:transition-colors *:cursor-pointer *:active:bg-gray-700 *:w-11">
+            <button className="text-green-300" onClick={handleUpdateTask}>
+              {isThisTaskLoading ? (
+                <Spinner size={1} />
+              ) : task.status === "done" ? (
                 <FontAwesomeIcon icon={faRotateRight} className="text-xl" />
               ) : (
                 <FontAwesomeIcon icon={faCheck} className="text-xl" />
@@ -66,10 +84,10 @@ export default function Task({ task, owner }: TaskProps) {
       <DeleteAlert
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        handleDelete={() => {}}
+        handleDelete={handleDelete}
         message="this task"
-        loading={false}
-        error={null}
+        loading={loadingTasks}
+        error={error}
       />
     </>
   );

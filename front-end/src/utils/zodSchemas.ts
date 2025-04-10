@@ -35,7 +35,8 @@ export const taskSchema = z.object({
   name: z
     .string()
     .min(3, "Name must be between 3 and 30 characters long")
-    .max(30, "Name must be between 3 and 30 characters long"),
+    .max(30, "Name must be between 3 and 30 characters long")
+    .regex(/^[a-zA-Z0-9 ]+$/, "Name must only contain letters and numbers"),
   status: z.enum(["in-progress", "done"]),
   completedAt: z.string().nullish(),
 });
@@ -45,10 +46,15 @@ export const projectSchema = z.object({
   name: z
     .string()
     .min(3, "Name must be between 3 and 30 characters long")
-    .max(50, "Name must be between 3 and 30 characters long"),
+    .max(50, "Name must be between 3 and 30 characters long")
+    .regex(/^[a-zA-Z0-9 ]+$/, "Name must only contain letters and numbers"),
   description: z
     .string()
-    .min(3, "Description must be at least 3 characters long"),
+    .min(3, "Description must be at least 3 characters long")
+    .regex(
+      /^[a-zA-Z0-9 ]+$/,
+      "Description must only contain letters and numbers"
+    ),
   owner: user.omit({ isActivated: true, email: true }),
   members: z.array(user.omit({ isActivated: true, email: true })),
   tasks: z.array(taskSchema),
@@ -106,8 +112,6 @@ export type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
 export type CreateOrUpdateProjectForm = z.infer<
   typeof createOrUpdateProjectSchema
 >;
-export type AddMemberForm = z.infer<typeof addMemberSchema>;
-export type AddTaskForm = z.infer<typeof addTaskSchema>;
 
 //----------- api response ---------- //
 

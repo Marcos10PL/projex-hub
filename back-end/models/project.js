@@ -8,12 +8,14 @@ const projectSchema = new mongoose.Schema(
       min: 3,
       max: 50,
       trim: true,
+      match: /^[a-zA-Z0-9 ]+$/,
     },
     description: {
       type: String,
       required: true,
       min: 3,
       trim: true,
+      match: /^[a-zA-Z0-9 ]+$/,
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
@@ -26,12 +28,20 @@ const projectSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    tasks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Task",
+    tasks: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Task",
+        },
+      ],
+      validate: {
+        validator: function (v) {
+          return v.length <= 50;
+        },
+        message: () => "Project cannot have more than 50 tasks!",
       },
-    ],
+    },
     status: {
       type: String,
       enum: ["planned", "active", "completed", "delayed"],

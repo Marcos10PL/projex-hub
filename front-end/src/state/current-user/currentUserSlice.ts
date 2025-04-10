@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import API from "../../utils/axiosConfig";
 import { User } from "../../utils/zodSchemas";
 import { AxiosError } from "axios";
@@ -21,11 +21,11 @@ const currentUserSlice = createSlice({
   name: "currentUser",
   initialState,
   reducers: {
-    setCurrentUser(state, action: PayloadAction<null | User>) {
+    setCurrentUser(state, action) {
       state.currentUser = action.payload;
       state.isAuthenticated = true;
     },
-    clearCurrentUser(state, action: PayloadAction<string | null>) {
+    clearCurrentUser(state, action) {
       state.currentUser = null;
       state.isAuthenticated = false;
       state.error = action.payload;
@@ -54,7 +54,7 @@ export const checkAuth = createAsyncThunk("currentUser/checkAuth", async () => {
     return res.data.user;
   } catch (error) {
     const axiosError = error as AxiosError;
-    
+
     if (axiosError.message === "Network Error") {
       throw new Error(
         "Network Error. Probably too many requests. Try again later."

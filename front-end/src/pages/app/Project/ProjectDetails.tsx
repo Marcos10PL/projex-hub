@@ -44,7 +44,7 @@ export default function ProjectDetails() {
         members={project.members}
       />
 
-      <Tasks tasks={project.tasks} owner={project.owner} />
+      <Tasks id={project._id} tasks={project.tasks} owner={project.owner} />
     </>
   );
 }

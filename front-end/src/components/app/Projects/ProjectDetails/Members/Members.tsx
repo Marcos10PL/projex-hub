@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { addMemberSchema, ProjectType } from "../../../../../utils/zodSchemas";
 import Member from "./Member";
-import { faPeopleGroup, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 import { RootState } from "../../../../../state/store";
 import { useSelector } from "react-redux";
 import { useState } from "react";
@@ -31,28 +31,17 @@ export default function Members({ id, owner, members }: MemebersProps) {
 
       <div className="flex flex-wrap gap-x-2.5">
         {projectOwner && (
-          <>
-            {!isOpen && (
-              <button
-                type="button"
-                className="flex items-center justify-center h-13 my-2 px-10 rounded-lg bg-gray-700 w-full md:w-fit border-2 border-emerald-400 hover:bg-gray-600 transition-colors cursor-pointer shadow-[0_0_2px_2px_#113233] active:bg-gray-600 py-3"
-                onClick={() => setIsOpen(!isOpen)}
-              >
-                <FontAwesomeIcon icon={faPlus} />
-              </button>
-            )}
-            <AddForm
-              id={id}
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              schema={addMemberSchema}
-              placeholder="Username..."
-              fieldName="username"
-              loading={loadingMembers}
-              error={error}
-              asyncThunk={addMember}
-            />
-          </>
+          <AddForm
+            id={id}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            schema={addMemberSchema}
+            placeholder="Username..."
+            fieldName="username"
+            loading={loadingMembers}
+            error={error}
+            asyncThunk={addMember}
+          />
         )}
 
         <Member id={id} member={owner} owner={owner} isOwner />

@@ -32,7 +32,7 @@ export default function Logout() {
             icon={faRightFromBracket}
             className="text-2xl md:text-3xl cursor-pointer"
           />
-          <span>Logout</span>
+          <span>Log out</span>
         </>
       )}
     </button>

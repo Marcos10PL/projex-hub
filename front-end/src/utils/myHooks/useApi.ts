@@ -42,8 +42,6 @@ export default function useApi<T>(
 
         const dataRes = schema.safeParse(res.data);
         if (dataRes.success) return dataRes.data;
-
-        console.log(dataRes.error);
       } catch (err) {
         const { response } = err as AxiosError<T>;
 

@@ -8,11 +8,12 @@ const taskSchema = new mongoose.Schema(
       min: 3,
       max: 30,
       trim: true,
+      match: /^[a-zA-Z0-9 ]+$/,
     },
     status: {
       type: String,
       enum: ["in-progress", "done"],
-      default: "to-do",
+      default: "in-progress",
     },
     completedAt: Date,
   },
