@@ -7,18 +7,25 @@ import {
 import ErrorMsg from "../../components/ErrorMsg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
-import { useSelector } from "react-redux";
-import { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useEffect, useState } from "react";
 import Spinner from "../../components/Spinner";
 import { resendEmail } from "../../utils/utils";
 import useApi from "../../utils/myHooks/useApi";
-import { RootState } from "../../state/store";
+import { AppDispatch, RootState } from "../../state/store";
+import {
+  setEmail,
+  setUsername,
+} from "../../state/current-user/currentUserSlice";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
 
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+  const [seconds, setSeconds] = useState(3);
+
+  const dispatch = useDispatch<AppDispatch>();
 
   const { fetchData, errorMsg, loading } = useApi(
     "auth/update-profile",
@@ -39,8 +46,29 @@ export default function Profile() {
   const onSubmit: SubmitHandler<UpdateProfileForm> = async data => {
     setSuccess(false);
     const res = await fetchData({ data });
-    if (res?.success) setSuccess(true);
+    if (res?.success) {
+      setSuccess(true);
+      if (res.user.email) dispatch(setEmail(res.user.email));
+      if (res.user.username) dispatch(setUsername(res.user.username));
+    }
   };
+
+  useEffect(() => {
+    if (!success) return;
+
+    const interval = setInterval(() => {
+      setSeconds(prev => prev - 1);
+    }, 1000);
+
+    const timeout = setTimeout(() => {
+      window.location.reload();
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [success]);
 
   const handleResendEmail = useCallback(async () => {
     const res = await resendEmail(user?.email || "");
@@ -127,7 +155,10 @@ export default function Profile() {
       {success && (
         <div className="text-center text-secondary my-2">
           Your data has been updated. <br /> If you updated your email, check
-          your inbox.
+          your inbox. <br />
+          <span>
+            Page will be reloaded in {seconds} second{seconds > 1 && "s"}.
+          </span>
         </div>
       )}
     </>

@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import API from "../../utils/axiosConfig";
 import { User } from "../../utils/zodSchemas";
 import { AxiosError } from "axios";
@@ -21,7 +21,17 @@ const currentUserSlice = createSlice({
   name: "currentUser",
   initialState,
   reducers: {
-    setCurrentUser(state, action) {
+    setEmail(state, action: PayloadAction<User["email"]>) {
+      if (state.currentUser) {
+        state.currentUser.email = action.payload;
+      }
+    },
+    setUsername(state, action: PayloadAction<User["username"]>) {
+      if (state.currentUser) {
+        state.currentUser.username = action.payload;
+      }
+    },
+    setCurrentUser(state, action: PayloadAction<User>) {
       state.currentUser = action.payload;
       state.isAuthenticated = true;
     },
@@ -33,7 +43,7 @@ const currentUserSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      .addCase(checkAuth.fulfilled, (state, action) => {
+      .addCase(checkAuth.fulfilled, (state, action: PayloadAction<User>) => {
         state.currentUser = action.payload;
         state.isAuthenticated = action.payload !== null;
         state.loading = false;
@@ -64,5 +74,5 @@ export const checkAuth = createAsyncThunk("currentUser/checkAuth", async () => {
   }
 });
 
-export const { setCurrentUser, clearCurrentUser } = currentUserSlice.actions;
+export const { setCurrentUser, clearCurrentUser, setEmail, setUsername } = currentUserSlice.actions;
 export default currentUserSlice.reducer;

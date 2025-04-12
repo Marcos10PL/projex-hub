@@ -6,7 +6,7 @@ import { RootState } from "../../../../../state/store";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import AddForm from "../AddForm";
-import { addMember } from "../../../../../state/project/membersThunk";
+import { addMember } from "../../../../../state/projects/membersThunk";
 
 type MemebersProps = {
   id: ProjectType["_id"];
@@ -17,7 +17,7 @@ type MemebersProps = {
 export default function Members({ id, owner, members }: MemebersProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
   const { loadingMembers, error } = useSelector(
-    (state: RootState) => state.project
+    (state: RootState) => state.projects
   );
   const projectOwner = user?._id === owner._id;
   const [isOpen, setIsOpen] = useState(false);

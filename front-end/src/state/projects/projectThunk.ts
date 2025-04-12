@@ -3,9 +3,13 @@ import API from "../../utils/axiosConfig";
 import { projectResponseSchema, ProjectType } from "../../utils/zodSchemas";
 import { AxiosError } from "axios";
 
+type FetchProjectArgs = {
+  id: ProjectType["_id"];
+};
+
 export const fetchProject = createAsyncThunk(
   "project/fetchProject",
-  async (id: string, { rejectWithValue }) => {
+  async ({ id }: FetchProjectArgs, { rejectWithValue }) => {
     try {
       const response = await API.get(`/projects/${id}`);
 
@@ -24,39 +28,17 @@ export const fetchProject = createAsyncThunk(
   }
 );
 
-type ProjectArgs = {
-  id: ProjectType["_id"];
-  projectData: Partial<
+type CreateProjectProjectArgs = {
+  data: Partial<
     Pick<ProjectType, "name" | "description" | "status" | "dueDate">
   >;
 };
 
 export const createProject = createAsyncThunk(
   "project/createProject",
-  async ({ id, projectData }: ProjectArgs, { rejectWithValue }) => {
+  async ({ data }: CreateProjectProjectArgs, { rejectWithValue }) => {
     try {
-      const response = await API.post(`/projects${id}`, projectData);
-
-      const parsedDate = projectResponseSchema.safeParse(response.data);
-
-      if (!parsedDate.success) {
-        console.error(parsedDate.error);
-        return rejectWithValue("Something went wrong. Please try again later.");
-      }
-
-      return parsedDate.data.project;
-    } catch (error) {
-      console.error(error);
-      return rejectWithValue("Server error. Please try again later.");
-    }
-  }
-);
-
-export const updateProject = createAsyncThunk(
-  "project/updateProject",
-  async ({ id, projectData }: ProjectArgs, { rejectWithValue }) => {
-    try {
-      const response = await API.patch(`/projects/${id}`, projectData);
+      const response = await API.post(`/projects`, data);
 
       const parsedDate = projectResponseSchema.safeParse(response.data);
 
@@ -77,9 +59,42 @@ export const updateProject = createAsyncThunk(
   }
 );
 
+type UpdateProjectArgs = CreateProjectProjectArgs & {
+  id: ProjectType["_id"];
+};
+
+export const updateProject = createAsyncThunk(
+  "project/updateProject",
+  async ({ id, data }: UpdateProjectArgs, { rejectWithValue }) => {
+    try {
+      const response = await API.patch(`/projects/${id}`, data);
+
+      const parsedDate = projectResponseSchema.safeParse(response.data);
+
+      if (!parsedDate.success) {
+        console.error(parsedDate.error);
+        return rejectWithValue("Something went wrong. Please try again later.");
+      }
+
+      return parsedDate.data.project;
+    } catch (error) {
+      const err = error as AxiosError;
+
+      if (err.response?.status === 400) {
+        return rejectWithValue("Project already exists with this name");
+      }
+      return rejectWithValue("Server error. Please try again later.");
+    }
+  }
+);
+
+type DeleteProjectArgs = {
+  id: ProjectType["_id"];
+};
+
 export const deleteProject = createAsyncThunk(
   "project/deleteProject",
-  async (id: string, { rejectWithValue }) => {
+  async ({ id }: DeleteProjectArgs, { rejectWithValue }) => {
     try {
       const response = await API.delete(`/projects/${id}`);
 

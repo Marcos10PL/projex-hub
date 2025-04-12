@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../../state/store";
 import { useState } from "react";
 import DeleteAlert from "../../../../DeleteAlert";
-import { removeMember } from "../../../../../state/project/membersThunk";
+import { removeMember } from "../../../../../state/projects/membersThunk";
 
 type MemberProps = {
   id: ProjectType["_id"];
@@ -17,7 +17,7 @@ type MemberProps = {
 export default function Member({ id, member, isOwner, owner }: MemberProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
   const { loadingMembers, error } = useSelector(
-    (state: RootState) => state.project
+    (state: RootState) => state.projects
   );
   const dispatch = useDispatch<AppDispatch>();
 

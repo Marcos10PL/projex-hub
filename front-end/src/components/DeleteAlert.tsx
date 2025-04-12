@@ -1,5 +1,9 @@
+import { useEffect } from "react";
 import ErrorMsg from "./ErrorMsg";
 import Spinner from "./Spinner";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../state/store";
+import { clearError } from "../state/projects/projectsSlice";
 
 type DeleteAlertProps = {
   isOpen: boolean;
@@ -18,6 +22,12 @@ export default function DeleteAlert({
   loading,
   error,
 }: DeleteAlertProps) {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
   if (isOpen)
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black/20 backdrop-blur-sm">

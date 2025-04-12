@@ -8,7 +8,7 @@ import clsx from "clsx";
 import { AppDispatch, RootState } from "../../../../state/store";
 import DeleteAlert from "../../../DeleteAlert";
 import { useState } from "react";
-import { deleteProject } from "../../../../state/project/projectThunk";
+import { deleteProject } from "../../../../state/projects/projectThunk";
 
 type TopPanelProps = {
   id: ProjectType["_id"];
@@ -18,7 +18,7 @@ type TopPanelProps = {
 
 export default function TopPanel({ id, status, owner }: TopPanelProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
-  const { loading } = useSelector((state: RootState) => state.project);
+  const { loadingProject } = useSelector((state: RootState) => state.projects);
   const dispatch = useDispatch<AppDispatch>();
 
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleDelete = async () => {
-    dispatch(deleteProject(id));
+    dispatch(deleteProject({ id }));
     navigate("/projects", { replace: true });
   };
 
@@ -70,10 +70,8 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
         message="this project"
-        loading={loading}
+        loading={loadingProject}
       />
     </div>
   );
 }
-
-

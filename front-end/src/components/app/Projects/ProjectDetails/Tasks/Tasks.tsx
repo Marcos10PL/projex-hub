@@ -5,7 +5,7 @@ import { faTasks } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../state/store";
 import AddForm from "../AddForm";
-import { addTask } from "../../../../../state/project/tasksThunk";
+import { addTask } from "../../../../../state/projects/tasksThunk";
 import { useState } from "react";
 import { MAX_TASKS } from "../../../../../utils/data";
 
@@ -18,7 +18,7 @@ type TasksProps = {
 export default function Tasks({ id, tasks, owner }: TasksProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
   const { loadingTasks, error } = useSelector(
-    (state: RootState) => state.project
+    (state: RootState) => state.projects
   );
   const [isOpen, setIsOpen] = useState(false);
 

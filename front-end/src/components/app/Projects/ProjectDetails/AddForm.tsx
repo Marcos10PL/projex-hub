@@ -11,10 +11,10 @@ import { AppDispatch } from "../../../../state/store";
 import {
   addMember,
   AddMemberArgs,
-} from "../../../../state/project/membersThunk";
-import { clearError } from "../../../../state/project/projectSlice";
-import { addTask, AddTaskArgs } from "../../../../state/project/tasksThunk";
+} from "../../../../state/projects/membersThunk";
+import { addTask, AddTaskArgs } from "../../../../state/projects/tasksThunk";
 import clsx from "clsx";
+import { clearError } from "../../../../state/projects/projectsSlice";
 
 type AsyncThunk = typeof addMember | typeof addTask;
 
@@ -64,7 +64,7 @@ export default function AddForm<T extends FieldValues, A extends AsyncThunk>({
     }
 
     if (asyncThunk === addTask) {
-      const taskArgs = args as AddTaskArgs;;
+      const taskArgs = args as AddTaskArgs;
       dispatch(asyncThunk(taskArgs));
     }
     setSuccess(true);

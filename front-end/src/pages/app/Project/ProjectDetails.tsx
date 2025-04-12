@@ -7,20 +7,27 @@ import Tasks from "../../../components/app/Projects/ProjectDetails/Tasks/Tasks";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../state/store";
 import { useEffect } from "react";
-import { fetchProject } from "../../../state/project/projectThunk";
+import { fetchProject } from "../../../state/projects/projectThunk";
+import { setProject } from "../../../state/projects/projectsSlice";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
-  const { project, loading } = useSelector((state: RootState) => state.project);
+  const { projects, project, loadingProject } = useSelector(
+    (state: RootState) => state.projects
+  );
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    if (id && project?._id !== id) dispatch(fetchProject(id));
-  }, [id, dispatch, project]);
+    const selectedProject = projects?.find(project => project._id === id);
+    dispatch(setProject(selectedProject));
 
-  if (loading) return <Spinner size={2} />;
+    if (!selectedProject && id)
+      dispatch(fetchProject({ id }));
+  }, [dispatch, id, projects]);
 
-  if (!project) return <p>Project not found</p>;
+  if (loadingProject) return <Spinner size={2} />;
+
+  if (!project) return <p className="text-center">Project not found</p>;
 
   return (
     <>

@@ -1,6 +1,7 @@
 //------------ Select options for projects ------------//
 
 import { StylesConfig } from "react-select";
+import { OptionType } from "./types";
 
 const optionsStatusCommon = [
   { value: "active", label: "Active" },
@@ -33,25 +34,7 @@ export const optionsDueDate = [
   { value: "noDueDate", label: "No due date" },
 ] as const;
 
-export type OptionDueDate = (typeof optionsDueDate)[number];
-export type OptionsDueDate = OptionDueDate["value"];
-
-export type OptionSort = (typeof optionsSort)[number];
-export type OptionsSort = OptionSort["value"];
-
-export type OptionStatus = (typeof optionsStatus)[number];
-export type OptionsStatus = OptionStatus["value"];
-
 export const optionsStatusNoNull = optionsStatusCommon;
-
-export type OptionStatusNoNull = (typeof optionsStatusNoNull)[number];
-export type OptionsStatusNoNull = OptionStatusNoNull["value"];
-
-export type OptionType =
-  | OptionSort
-  | OptionStatus
-  | OptionDueDate
-  | OptionStatusNoNull;
 
 // ------------ Status color ------------//
 
@@ -108,17 +91,5 @@ export const customStyles = <T extends OptionType>(): StylesConfig<
   }),
 });
 
-// ------------ project params ------------//
-
-export type ProjectParams = {
-  status?: OptionsStatus;
-  sort?: OptionsSort;
-  dueDate?: OptionsDueDate;
-  dueDateBefore?: Date | null;
-  dueDateAfter?: Date | null;
-  page?: number | null;
-  limit?: number | null;
-  search?: string | null;
-};
-
 export const MAX_TASKS = 50;
+

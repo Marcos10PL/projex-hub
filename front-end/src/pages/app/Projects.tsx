@@ -1,66 +1,60 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import Spinner from "../../components/Spinner";
 import SelectDueDate from "../../components/app/Projects/SelectDueDay";
-import {
-  customStyles,
-  OptionDueDate,
-  optionsDueDate,
-  OptionsDueDate,
-  OptionSort,
-  optionsSort,
-  OptionsSort,
-  optionsStatus,
-  OptionsStatus,
-  OptionStatus,
-  ProjectParams,
-} from "../../utils/data";
+import { OptionDueDate, OptionSort, OptionStatus } from "../../utils/types";
 import Project from "../../components/app/Projects/Project";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../state/store";
 import { fetchProjects } from "../../state/projects/projectsThunk";
+import { NavLink } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { setFilters } from "../../state/projects/projectsSlice";
+import { Filters } from "../../utils/types";
+import {
+  customStyles,
+  optionsDueDate,
+  optionsSort,
+  optionsStatus,
+} from "../../utils/data";
 
 export default function Projects() {
-  const [selectedStatus, setSelectedStatus] = useState<OptionsStatus>();
-  const [selectedSort, setSelectedSort] = useState<OptionsSort>();
-  const [selectedDueDate, setSelectedDueDate] = useState<OptionsDueDate>();
-  const [selectedDueDayBefore, setSelectedDueDayBefore] = useState<Date>();
-  const [selectedDueDayAfter, setSelectedDueDayAfter] = useState<Date>();
-
+  const filters = useSelector((state: RootState) => state.projects.filters);
   const { projects, loading } = useSelector(
     (state: RootState) => state.projects
   );
+
+  const [selectedDueDayBefore, setSelectedDueDayBefore] = useState<Date>();
+  const [selectedDueDayAfter, setSelectedDueDayAfter] = useState<Date>();
+
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    const filters: ProjectParams = {
-      status: selectedStatus,
-      sort: selectedSort,
-      dueDate: selectedDueDate,
-      dueDateBefore: selectedDueDayBefore,
-      dueDateAfter: selectedDueDayAfter,
-    };
-    if (filters) dispatch(fetchProjects(filters));
-  }, [
-    dispatch,
-    selectedStatus,
-    selectedSort,
-    selectedDueDate,
-    selectedDueDayBefore,
-    selectedDueDayAfter,
-  ]);
+  const prevFiltersRef = useRef<Partial<Filters>>(filters);
 
   useEffect(() => {
-    if (selectedDueDayBefore) setSelectedDueDate(null);
-    if (selectedDueDayAfter) setSelectedDueDate(null);
-  }, [selectedDueDayBefore, selectedDueDayAfter]);
-
-  useEffect(() => {
-    if (selectedDueDate) {
-      setSelectedDueDayBefore(undefined);
-      setSelectedDueDayAfter(undefined);
+    if (JSON.stringify(filters) !== JSON.stringify(prevFiltersRef.current)) {
+      dispatch(fetchProjects(filters));
+      prevFiltersRef.current = filters;
+    } else {
+      const areAllFiltersNull = Object.values(filters).every(
+        value => value === null || value === undefined
+      );
+      if (areAllFiltersNull && projects?.length === 0)
+        dispatch(fetchProjects(filters));
     }
-  }, [selectedDueDate]);
+  }, [dispatch, filters, projects]);
+
+  useEffect(() => {
+    if (selectedDueDayAfter) {
+      dispatch(setFilters({ dueDateAfter: selectedDueDayAfter.toISOString() }));
+    } else dispatch(setFilters({ dueDateAfter: null }));
+    if (selectedDueDayBefore)
+      dispatch(
+        setFilters({ dueDateBefore: selectedDueDayBefore.toISOString() })
+      );
+    else dispatch(setFilters({ dueDateBefore: null }));
+  }, [dispatch, selectedDueDayAfter, selectedDueDayBefore]);
 
   return (
     <>
@@ -84,21 +78,23 @@ export default function Projects() {
           <Select
             options={optionsStatus}
             value={optionsStatus.find(
-              option => option.value === selectedStatus
+              option => option.value === filters.status
             )}
+            defaultValue={optionsStatus[0]}
             isSearchable={false}
             styles={customStyles<OptionStatus>()}
-            onChange={option => setSelectedStatus(option?.value)}
+            onChange={option => dispatch(setFilters({ status: option?.value }))}
           />
         </label>
         <label>
           <p className="opacity-70 pb-1">Sort</p>
           <Select
             options={optionsSort}
-            value={optionsSort.find(option => option.value === selectedSort)}
+            value={optionsSort.find(option => option.value === filters.sort)}
             isSearchable={false}
+            defaultValue={optionsSort[0]}
             styles={customStyles<OptionSort>()}
-            onChange={option => setSelectedSort(option?.value)}
+            onChange={option => dispatch(setFilters({ sort: option?.value }))}
           />
         </label>
         <label>
@@ -106,14 +102,26 @@ export default function Projects() {
           <Select
             options={optionsDueDate}
             value={optionsDueDate.find(
-              option => option.value === selectedDueDate
+              option => option.value === filters.dueDate
             )}
+            defaultValue={optionsDueDate[0]}
             isSearchable={false}
             styles={customStyles<OptionDueDate>()}
-            onChange={option => setSelectedDueDate(option?.value)}
+            onChange={option =>
+              dispatch(setFilters({ dueDate: option?.value }))
+            }
           />
         </label>
       </section>
+
+      {/* BUTTON - ADD PROJECT */}
+      <NavLink
+        to="/projects/create"
+        className="button flex items-center gap-2 justify-center mt-6 md:mt-8 uppercase"
+      >
+        <FontAwesomeIcon icon={faPlus} />
+        <span>new</span>
+      </NavLink>
 
       {/* BORDER */}
       <div className="border-t-2 border-dashed my-6 md:my-8" />

@@ -13,7 +13,7 @@ import { useState } from "react";
 import {
   deleteTask,
   updateTask,
-} from "../../../../../state/project/tasksThunk";
+} from "../../../../../state/projects/tasksThunk";
 import Spinner from "../../../../Spinner";
 
 type TaskProps = {
@@ -25,8 +25,9 @@ type TaskProps = {
 export default function Task({ id, task, owner }: TaskProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
   const { loadingTasks, loadingTask, error } = useSelector(
-    (state: RootState) => state.project
+    (state: RootState) => state.projects
   );
+
   const dispatch = useDispatch<AppDispatch>();
 
   const [isOpen, setIsOpen] = useState(false);
