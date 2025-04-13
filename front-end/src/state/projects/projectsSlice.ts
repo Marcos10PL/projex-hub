@@ -12,39 +12,43 @@ import { addTask, deleteTask, updateTask } from "./tasksThunk";
 import { Filters } from "../../utils/types";
 
 type ProjectsState = {
-  projects: ProjectType[] | null;
+  projects: ProjectType[];
   project: ProjectType | null;
   loading: boolean;
-  loadingProject: boolean;
-  error: string | null;
-  currentPage: number | null;
-  totalPages: number | null;
-  totalProjects: number | null;
-  loadingMembers: boolean;
   loadingTasks: boolean;
+  loadingMembers: boolean;
+  loadingProject: boolean;
+  loadingDelete: boolean;
   loadingTask: ProjectType["tasks"][number]["_id"] | false;
+  error: string | null;
+  totalPages: number;
+  totalProjects: number;
   filters: Filters;
+};
+
+export const initialFilters: Filters = {
+  status: null,
+  sort: undefined,
+  dueDate: undefined,
+  dueDateBefore: null,
+  dueDateAfter: null,
+  currentPage: 1,
+  search: "",
 };
 
 const initialState: ProjectsState = {
   projects: [],
   project: null,
   loading: false,
-  loadingProject: false,
-  error: null,
-  currentPage: null,
-  totalPages: null,
-  totalProjects: null,
-  loadingMembers: false,
   loadingTasks: false,
+  loadingMembers: false,
+  loadingProject: false,
   loadingTask: false,
-  filters: {
-    status: null,
-    sort: null,
-    dueDate: null,
-    dueDateBefore: null,
-    dueDateAfter: null,
-  },
+  loadingDelete: false,
+  error: null,
+  totalPages: 1,
+  totalProjects: 0,
+  filters: initialFilters,
 };
 
 const projectsSlice = createSlice({
@@ -57,8 +61,11 @@ const projectsSlice = createSlice({
         ...action.payload,
       };
     },
-    setProject(state, action) {
+    setProject(state, action: PayloadAction<ProjectType>) {
       state.project = action.payload;
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.filters.currentPage = action.payload;
     },
     clearProject(state) {
       state.project = null;
@@ -66,36 +73,60 @@ const projectsSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
+    clearLoading(state) {
+      state.loading = false;
+    },
   },
   extraReducers: builder => {
     builder
-
       // -------------------------- projects----------------------------//
       .addCase(fetchProjects.pending, state => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
-        const { projects, currentPage, totalPages, totalProjects } =
-          action.payload;
+        const { projects, totalPages, totalProjects } = action.payload;
 
         state.projects = projects;
-        state.currentPage = currentPage;
         state.totalPages = totalPages;
         state.totalProjects = totalProjects;
         state.loading = false;
         state.error = null;
 
         state.filters = {
-          status: action.meta.arg.status,
-          sort: action.meta.arg.sort,
-          dueDate: action.meta.arg.dueDate,
-          dueDateBefore: action.meta.arg.dueDateBefore,
-          dueDateAfter: action.meta.arg.dueDateAfter,
+          ...state.filters,
+          ...action.meta.arg,
         };
       })
-      .addCase(fetchProjects.rejected, (state, action) => {
-        state.loading = false;
+
+      //  -------------------------- delete project----------------------------//
+      .addCase(deleteProject.pending, state => {
+        state.loadingDelete = true;
+        state.error = null;
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
+        state.loadingDelete = false;
+        state.error = null;
+        state.projects =
+          state.projects?.filter(
+            project => project._id !== action.meta.arg.id
+          ) || [];
+
+        if (state.totalProjects > 0) {
+          state.totalProjects--;
+        }
+        if (state.projects.length === 0 && state.totalPages > 1) {
+          if (state.filters.currentPage === state.totalPages) {
+            state.filters.currentPage--;
+          }
+          state.totalPages--;
+        }
+      })
+      .addCase(deleteProject.rejected, (state, action) => {
+        state.loadingDelete = false;
         state.error = action.payload as string;
       })
 
@@ -161,8 +192,7 @@ const projectsSlice = createSlice({
         isAnyOf(
           fetchProject.pending,
           createProject.pending,
-          updateProject.pending,
-          deleteProject.pending
+          updateProject.pending
         ),
         state => {
           state.loadingProject = true;
@@ -173,8 +203,7 @@ const projectsSlice = createSlice({
         isAnyOf(
           fetchProject.fulfilled,
           createProject.fulfilled,
-          updateProject.fulfilled,
-          deleteProject.fulfilled
+          updateProject.fulfilled
         ),
         (state, action) => {
           state.error = null;
@@ -185,8 +214,9 @@ const projectsSlice = createSlice({
           }
 
           if (createProject.fulfilled.match(action)) {
-            state.projects?.push(action.payload);
+            state.projects = [...state.projects, action.payload];
             state.project = action.payload;
+            state.totalProjects++;
           }
 
           if (updateProject.fulfilled.match(action)) {
@@ -197,10 +227,7 @@ const projectsSlice = createSlice({
           }
 
           if (deleteProject.fulfilled.match(action)) {
-            state.projects =
-              state.projects?.filter(
-                project => project._id !== action.meta.arg.id
-              ) || [];
+            state.project = null;
           }
         }
       )
@@ -208,8 +235,7 @@ const projectsSlice = createSlice({
         isAnyOf(
           fetchProject.rejected,
           createProject.rejected,
-          updateProject.rejected,
-          deleteProject.rejected
+          updateProject.rejected
         ),
         (state, action) => {
           state.loadingProject = false;
@@ -219,7 +245,14 @@ const projectsSlice = createSlice({
   },
 });
 
-export const { setFilters, setProject, clearProject, clearError } =
-  projectsSlice.actions;
+export const {
+  setFilters,
+  setProject,
+  clearProject,
+  clearError,
+  setCurrentPage,
+  setLoading,
+  clearLoading,
+} = projectsSlice.actions;
 
 export default projectsSlice.reducer;

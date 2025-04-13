@@ -18,9 +18,10 @@ type TopPanelProps = {
 
 export default function TopPanel({ id, status, owner }: TopPanelProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
-  const { loadingProject } = useSelector((state: RootState) => state.projects);
+  const { loadingDelete, error } = useSelector(
+    (state: RootState) => state.projects
+  );
   const dispatch = useDispatch<AppDispatch>();
-
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +29,7 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
   const handleDelete = async () => {
     dispatch(deleteProject({ id }));
     navigate("/projects", { replace: true });
+    location.reload();
   };
 
   const projectOwner = user?._id === owner._id;
@@ -70,7 +72,8 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
         message="this project"
-        loading={loadingProject}
+        loading={loadingDelete}
+        error={error}
       />
     </div>
   );

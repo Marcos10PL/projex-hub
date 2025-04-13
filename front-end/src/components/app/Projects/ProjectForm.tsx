@@ -1,12 +1,7 @@
 import Select from "react-select";
 import ErrorMsg from "../../ErrorMsg";
 import SelectDueDate from "./SelectDueDay";
-import {
-  customStyles,
-  OptionsStatusNoNull,
-  optionsStatusNoNull,
-  OptionStatusNoNull,
-} from "../../../utils/data";
+import { customStyles, optionsStatusNoNull } from "../../../utils/data";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import Spinner from "../../Spinner";
 import { clearError } from "../../../state/projects/projectsSlice";
+import { OptionsStatusNoNull, OptionStatusNoNull } from "../../../utils/types";
 
 type ProjectFormProps = {
   id?: ProjectType["_id"];
@@ -40,7 +36,7 @@ export default function ProjectForm({
   error,
   type,
 }: ProjectFormProps) {
-  const { project: newProject } = useSelector(
+  const { project: newProject, projects } = useSelector(
     (state: RootState) => state.projects
   );
 
@@ -91,9 +87,10 @@ export default function ProjectForm({
   }, [dispatch]);
 
   useEffect(() => {
-    if (!loading && !error && success)
+    if (!loading && !error && success) {
       navigate(`/projects/${id ?? newProject?._id}`);
-  }, [loading, error, navigate, id, success, newProject?._id]);
+    }
+  }, [loading, error, navigate, id, success, newProject?._id, projects]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

@@ -19,10 +19,9 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     const selectedProject = projects?.find(project => project._id === id);
-    dispatch(setProject(selectedProject));
+    if (selectedProject !== undefined) dispatch(setProject(selectedProject));
 
-    if (!selectedProject && id)
-      dispatch(fetchProject({ id }));
+    if (!selectedProject && id) dispatch(fetchProject({ id }));
   }, [dispatch, id, projects]);
 
   if (loadingProject) return <Spinner size={2} />;

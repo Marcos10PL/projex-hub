@@ -19,7 +19,7 @@ const port = process.env.PORT;
 const corsUrl = process.env.CORS_URL;
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
-  limit: 100,
+  limit: 1000,
   message: {
     success: false,
     msg: "Too many requests, please try again after 15 minutes",

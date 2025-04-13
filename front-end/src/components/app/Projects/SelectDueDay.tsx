@@ -41,6 +41,7 @@ export default function SelectDueDate({
           <FontAwesomeIcon icon={faChevronDown} className="fill-secondary" />
         )}
       </button>
+      
       {isOpened && (
         <div className="bg-gray-800 p-4 rounded-lg z-10 border-2 border-gray-700 absolute w-full flex justify-center mt-2">
           <DayPicker

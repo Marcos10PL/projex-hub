@@ -1,13 +1,15 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { ProjectParams } from "../../utils/data";
+import { Filters } from "../../utils/types";
 import API from "../../utils/axiosConfig";
 import { projectsResponseSchema } from "../../utils/zodSchemas";
 
 export const fetchProjects = createAsyncThunk(
   "projects/fetchProjects",
-  async (filetrs: ProjectParams, { rejectWithValue }) => {
+  async (filters: Filters, { rejectWithValue }) => {
     try {
-      const response = await API.get("/projects", { params: filetrs });
+      const response = await API.get("/projects", {
+        params: { ...filters, page: filters.currentPage },
+      });
 
       const parsedDate = projectsResponseSchema.safeParse(response.data);
 

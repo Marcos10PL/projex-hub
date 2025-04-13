@@ -10,7 +10,7 @@ type DeleteAlertProps = {
   setIsOpen: (isOpen: boolean) => void;
   handleDelete: () => void;
   message: string;
-  loading?: boolean;
+  loading: boolean;
   error: string | null;
 };
 

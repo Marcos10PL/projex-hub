@@ -4,7 +4,6 @@ import {
   optionsStatus,
   optionsStatusNoNull,
 } from "./data";
-import { ProjectType } from "./zodSchemas";
 
 export type OptionDueDate = (typeof optionsDueDate)[number];
 export type OptionsDueDate = OptionDueDate["value"];
@@ -25,20 +24,11 @@ export type OptionType =
   | OptionStatusNoNull;
 
 export type Filters = {
-  status: ProjectType["status"] | null | undefined;
+  status: OptionsStatus | null | undefined;
   sort: OptionsSort | undefined;
   dueDate: OptionsDueDate | undefined;
   dueDateBefore: string | null | undefined;
   dueDateAfter: string | null | undefined;
-};
-
-export type ProjectParams = {
-  status?: OptionsStatus;
-  sort?: OptionsSort;
-  dueDate?: OptionsDueDate;
-  dueDateBefore?: Date | null;
-  dueDateAfter?: Date | null;
-  page?: number | null;
-  limit?: number | null;
-  search?: string | null;
+  currentPage: number;
+  search: string;
 };
