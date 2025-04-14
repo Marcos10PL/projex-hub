@@ -1,10 +1,10 @@
-import Spinner from "../../components/Spinner";
-import Pagination from "../../components/app/Projects/Pagination";
-import Selects from "../../components/app/Projects/Selects";
-import AddProjectButton from "../../components/app/Projects/AddProjectButton";
-import { useProjects } from "../../utils/myHooks/useProjects";
-import ProjectsList from "../../components/app/Projects/ProjectsList";
-import SearchBar from "../../components/app/Projects/SearchBar";
+import Spinner from "../../../components/Spinner";
+import Pagination from "../../../components/app/Projects/Pagination";
+import Selects from "../../../components/app/Projects/Selects";
+import AddProjectButton from "../../../components/app/Projects/AddProjectButton";
+import { useProjects } from "../../../utils/myHooks/useProjects";
+import ProjectsList from "../../../components/app/Projects/ProjectsList";
+import SearchBar from "../../../components/app/Projects/SearchBar";
 
 export default function Projects() {
   const {

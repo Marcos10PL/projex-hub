@@ -86,7 +86,7 @@ export default function Task({ id, task, owner }: TaskProps) {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
-        message="this task"
+        message="Are you sure you want to delete this task?"
         loading={loadingTasks}
         error={error}
       />

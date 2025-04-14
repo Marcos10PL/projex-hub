@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../state/store";
-import ProjectForm from "../../../components/app/Projects/ProjectForm";
+import { RootState } from "../../../../state/store";
+import ProjectForm from "../../../../components/app/Projects/ProjectForm";
 
 export default function UpdateProject() {
   const { id } = useParams<{ id: string }>();

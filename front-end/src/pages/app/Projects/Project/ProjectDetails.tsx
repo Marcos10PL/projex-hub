@@ -1,14 +1,14 @@
 import { useParams } from "react-router-dom";
-import Spinner from "../../../components/Spinner";
-import TopPanel from "../../../components/app/Projects/ProjectDetails/TopPanel";
-import MainPanel from "../../../components/app/Projects/ProjectDetails/MainPanel";
-import Members from "../../../components/app/Projects/ProjectDetails/Members/Members";
-import Tasks from "../../../components/app/Projects/ProjectDetails/Tasks/Tasks";
+import Spinner from "../../../../components/Spinner";
+import TopPanel from "../../../../components/app/Projects/ProjectDetails/TopPanel";
+import MainPanel from "../../../../components/app/Projects/ProjectDetails/MainPanel";
+import Members from "../../../../components/app/Projects/ProjectDetails/Members/Members";
+import Tasks from "../../../../components/app/Projects/ProjectDetails/Tasks/Tasks";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../state/store";
+import { AppDispatch, RootState } from "../../../../state/store";
 import { useEffect } from "react";
-import { fetchProject } from "../../../state/projects/projectThunk";
-import { setProject } from "../../../state/projects/projectsSlice";
+import { fetchProject } from "../../../../state/projects/projectThunk";
+import { setProject } from "../../../../state/projects/projectsSlice";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
@@ -21,8 +21,8 @@ export default function ProjectDetails() {
     const selectedProject = projects?.find(project => project._id === id);
     if (selectedProject !== undefined) dispatch(setProject(selectedProject));
 
-    if (!selectedProject && id) dispatch(fetchProject({ id }));
-  }, [dispatch, id, projects]);
+    if (!selectedProject && id && !project) dispatch(fetchProject({ id }));
+  }, [dispatch, id, projects, project]);
 
   if (loadingProject) return <Spinner size={2} />;
 

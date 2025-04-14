@@ -287,23 +287,24 @@ const addMember = async (req, res) => {
 
 const deleteMember = async (req, res) => {
   const memberId = req.params.memberId;
+  const userId = req.user._id;
 
   if (!mongoose.Types.ObjectId.isValid(memberId))
     throw new BadRequestError("Invalid member ID");
 
-  if (req.user._id.equals(memberId))
+  const project = await Project.findOne({
+    _id: req.params.id,
+    $or: [{ owner: userId }, { members: userId }],
+  });
+
+  if (!project) throw new NotFoundError("No project found");
+
+  if (project.owner._id.equals(memberId))
     throw new BadRequestError("You cannot remove yourself as a member");
 
   const member = await User.findById(memberId);
 
   if (!member) throw new NotFoundError("No user found");
-
-  const project = await Project.findOne({
-    _id: req.params.id,
-    owner: req.user._id,
-  });
-
-  if (!project) throw new NotFoundError("No project found");
 
   const memberExists = project.members.some(member =>
     member._id.equals(memberId)

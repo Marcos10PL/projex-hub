@@ -55,7 +55,7 @@ export default function Member({ id, member, isOwner, owner }: MemberProps) {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
-        message={`"${member.username}" from your project`}
+        message={`Are you sure you want remove "${member.username}" from your project?`}
         loading={loadingMembers}
         error={error}
       />

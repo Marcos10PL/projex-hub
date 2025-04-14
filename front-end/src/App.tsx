@@ -16,11 +16,11 @@ import HomeLayout from "./layouts/HomeLyout";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Profile from "./pages/app/Profile";
 import Home from "./pages/app/Home";
-import ProjectDetails from "./pages/app/Project/ProjectDetails";
-import Projects from "./pages/app/Projects";
-import UpdateProject from "./pages/app/Project/UpdateProject";
+import ProjectDetails from "./pages/app/Projects/Project/ProjectDetails";
+import Projects from "./pages/app/Projects/Projects";
+import UpdateProject from "./pages/app/Projects/Project/UpdateProject";
 import ErrorMsg from "./components/ErrorMsg";
-import CreateProject from "./pages/app/Project/CreateProject";
+import CreateProject from "./pages/app/Projects/Project/CreateProject";
 
 export default function App() {
   const { isAuthenticated, loading, error, currentUser } = useSelector(

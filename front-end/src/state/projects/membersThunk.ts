@@ -61,6 +61,11 @@ export const removeMember = createAsyncThunk(
       if (err.response?.status === 404)
         return rejectWithValue("Member not found");
 
+      if (err.response?.status === 400)
+        return rejectWithValue(
+          "Server error. Probably member left the project. Please refresh the page."
+        );
+
       return rejectWithValue("Server error. Please try again later.");
     }
   }
