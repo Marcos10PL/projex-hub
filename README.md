@@ -6,18 +6,18 @@ It allows you to create, manage, filter and search your projects. <br />
 
 ## features
 
--- registration and login
--- create, update, delete projects
--- project filtering and pagination
--- task management
--- team members
+-- registration and login<br />
+-- create, update, delete projects<br />
+-- project filtering and pagination<br />
+-- task management<br />
+-- team members<br />
 
 ## tech
 
 -- React.js <br />
 -- Redux <br />
 -- TypeScript <br />
--- Tailwind CSS <br /><br />
+-- Tailwind CSS <br />
 
 -- Node.js + Express <br />
 -- MongoDB (Mongoose) <br />
