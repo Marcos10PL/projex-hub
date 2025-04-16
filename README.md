@@ -14,8 +14,7 @@ It allows you to create, manage, filter and search your projects. <br />
 
 ## tech
 
--- React.js <br />
--- Redux <br />
+-- React.js + Redux <br />
 -- TypeScript <br />
 -- Tailwind CSS <br />
 
