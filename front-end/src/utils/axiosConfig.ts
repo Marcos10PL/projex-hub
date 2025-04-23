@@ -1,12 +1,15 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "/api",
   withCredentials: true,
 });
 
 API.interceptors.response.use(
-  response => response,
+  response => {
+    console.log(response);
+    return response;
+  },
   async error => {
     const isLoginAttempt = error.config?.url?.includes("auth/login");
 

@@ -1,0 +1,27 @@
+services:
+  frontend:
+    build: 
+      context: ./front-end
+    ports:
+      - "80:80"
+    env_file: 
+      - ./front-end/.env
+    networks:
+      - mynetwork
+    depends_on:
+      - backend
+
+  backend:
+    build: 
+      context: ./back-end
+    ports:
+      - "7452:7452" 
+    env_file: 
+      - ./back-end/.env 
+    networks:
+      - mynetwork 
+    restart: always
+
+networks:
+  mynetwork:
+    driver: bridge
