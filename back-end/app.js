@@ -15,8 +15,8 @@ import helmet from "helmet";
 // config
 dotenv.config();
 const app = express();
-const port = process.env.PORT;
-const corsUrl = process.env.CORS_URL;
+const port = process.env.PORT || 5000;
+const corsUrl = process.env.CORS_URL.toString();
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   limit: 1000,
