@@ -3,12 +3,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ProjectType } from "../../../../utils/zodSchemas";
 import { statusColor } from "../../../../utils/data";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../state/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../state/store";
 import DeleteAlert from "../../../DeleteAlert";
 import { useState } from "react";
-import { deleteProject } from "../../../../state/projects/projectThunk";
-import { removeMember } from "../../../../state/projects/membersThunk";
+import {
+  useDeleteProjectMutation,
+  useRemoveMemberMutation,
+} from "../../../../state/projects/projectsApi";
 
 type TopPanelProps = {
   id: ProjectType["_id"];
@@ -18,19 +20,36 @@ type TopPanelProps = {
 
 export default function TopPanel({ id, status, owner }: TopPanelProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
-  const { loadingDelete, error } = useSelector(
-    (state: RootState) => state.projects
-  );
-  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+
+  const [deleteProject, { isLoading: isLoadingDeleteProject }] =
+    useDeleteProjectMutation();
+  const [deleteMember, { isLoading: isLoadingDeleteMember }] =
+    useRemoveMemberMutation();
 
   const [isOpen, setIsOpen] = useState(false);
 
   const handleDelete = async () => {
-    if (projectOwner) dispatch(deleteProject({ id }));
-    else dispatch(removeMember({ id, memberId: user!._id }));
-    navigate("/projects", { replace: true });
-    location.reload();
+    if (projectOwner) {
+      try {
+        await deleteProject({ id }).unwrap();
+        navigate("/projects", { replace: true });
+      } catch (err) {
+        console.error("Failed to delete project:", err);
+      }
+    } else {
+      try {
+        if (!user) return;
+        await deleteMember({
+          id,
+          memberId: user?._id,
+          currentUser: true,
+        }).unwrap();
+        navigate("/projects", { replace: true });
+      } catch (err) {
+        console.error("Failed to leave project:", err);
+      }
+    }
   };
 
   const projectOwner = user?._id === owner._id;
@@ -68,8 +87,8 @@ export default function TopPanel({ id, status, owner }: TopPanelProps) {
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
         message={`Are you sure you want to ${projectOwner ? "delete" : "leave"} this project?`}
-        loading={loadingDelete}
-        error={error}
+        loading={isLoadingDeleteProject || isLoadingDeleteMember}
+        // error={error}
       />
     </div>
   );

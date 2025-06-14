@@ -5,7 +5,7 @@ import { DayPicker } from "react-day-picker";
 
 type SelectDueDateProps = {
   selectedDueDay: Date | undefined | null;
-  setSelectedDueDay: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  setSelectedDueDay:  (date: Date | undefined) => void;
   title: string;
 };
 

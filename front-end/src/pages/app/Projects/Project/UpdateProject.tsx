@@ -1,24 +1,18 @@
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../state/store";
 import ProjectForm from "../../../../components/app/Projects/ProjectForm";
+import { useGetProjectQuery } from "../../../../state/projects/projectsApi";
+import Spinner from "../../../../components/Spinner";
 
 export default function UpdateProject() {
   const { id } = useParams<{ id: string }>();
 
-  const { loadingProject, project, error } = useSelector(
-    (state: RootState) => state.projects
-  );
+  const { data, isLoading, isError } = useGetProjectQuery(id ?? "");
 
-  if (!project) return <p className="text-center">Project not found</p>;
+  if (isLoading) return <Spinner size={2} />;
 
-  return (
-    <ProjectForm
-      id={id}
-      project={project}
-      loading={loadingProject}
-      error={error}
-      type="update"
-    />
-  );
+  if (isError) return <p className="text-center">Error loading project</p>;
+
+  if (!data?.project) return <p className="text-center">Project not found</p>;
+
+  return <ProjectForm id={id} project={data.project} type="update" />;
 }

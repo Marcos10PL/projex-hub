@@ -144,3 +144,4 @@ export const updateProfileResponseSchema = apiResponseSchema.merge(
 export type ApiResponse = z.infer<typeof apiResponseSchema>;
 export type UpdateProfileResponse = z.infer<typeof updateProfileResponseSchema>;
 export type ProjectsResponse = z.infer<typeof projectsResponseSchema>;
+export type ProjectResponse = z.infer<typeof projectResponseSchema>;

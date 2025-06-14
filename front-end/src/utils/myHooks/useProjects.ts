@@ -1,83 +1,47 @@
+import { useGetProjectsQuery } from "../../state/projects/projectsApi";
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { AppDispatch, RootState } from "../../state/store";
-import { fetchProjects } from "../../state/projects/projectsThunk";
-import { setCurrentPage, setFilters } from "../../state/projects/projectsSlice";
-import _ from "lodash";
+import { setFilters } from "../../state/filters/projectsFiltersSlice";
+import { debounce } from "lodash";
+import { useEffect } from "react";
 
-export function useProjects() {
+type ProjectFilters = {
+  limit?: number;
+};
+
+export function useProjects({ limit }: ProjectFilters) {
+  const filters = useSelector((state: RootState) => state.proejctsFilters);
   const dispatch = useDispatch<AppDispatch>();
-  const { projects, totalPages, totalProjects, loading, filters } = useSelector(
-    (state: RootState) => state.projects
-  );
 
-  const [selectedDueDayBefore, setSelectedDueDayBefore] = useState<Date>();
-  const [selectedDueDayAfter, setSelectedDueDayAfter] = useState<Date>();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { data, isLoading } = useGetProjectsQuery({
+    ...filters,
+    limit: limit ?? 6,
+  });
 
-  const prevFiltersRef = useRef(filters);
-  const firstRender = useRef(true);
+  const handleSearch = debounce((value: string) => {
+    dispatch(setFilters({ search: value, currentPage: 1 }));
+  }, 500);
 
-  const setPage = useCallback(
-    (page: number) => dispatch(setCurrentPage(page)),
-    [dispatch]
-  );
+  const projects = data?.projects ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const totalProjects = data?.totalProjects ?? 0;
 
-  //search query
+  const setPage = (page: number) => dispatch(setFilters({ currentPage: page }));
+
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (searchQuery) dispatch(setFilters({ search: searchQuery }));
-      else dispatch(setFilters({ search: "" }));
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [searchQuery, dispatch, prevFiltersRef]);
-
-  // fetch projects when filters change
-  useEffect(() => {
-    const filtersChanged = !_.isEqual(filters, prevFiltersRef.current);
-
-    if (filtersChanged || (firstRender.current && projects?.length === 0)) {
-      dispatch(fetchProjects({ ...filters }));
-      prevFiltersRef.current = filters;
-      firstRender.current = false;
+    if (projects.length === 0 && filters.currentPage > 1) {
+      dispatch(setFilters({ currentPage: filters.currentPage - 1 }));
     }
-  }, [dispatch, filters, projects]);
-
-  // filters for the due date before and after
-  useEffect(() => {
-    dispatch(
-      setFilters({
-        dueDateBefore: selectedDueDayBefore
-          ? selectedDueDayBefore.toISOString()
-          : null,
-        dueDateAfter: selectedDueDayAfter
-          ? selectedDueDayAfter.toISOString()
-          : null,
-      })
-    );
-  }, [dispatch, selectedDueDayBefore, selectedDueDayAfter]);
-
-  //projects array has 11 elements - more pages to load
-  useEffect(() => {
-    if (projects?.length === 11)
-      dispatch(
-        setFilters({ currentPage: prevFiltersRef.current.currentPage + 1 })
-      );
-  }, [projects, dispatch]);
+  }, [projects.length, filters.currentPage, dispatch]);
 
   return {
     filters,
     projects,
     totalPages,
     totalProjects,
-    loading,
+    loading: isLoading,
     setPage,
-    selectedDueDayBefore,
-    setSelectedDueDayBefore,
-    selectedDueDayAfter,
-    setSelectedDueDayAfter,
-    searchQuery,
-    setSearchQuery,
+    setFilters,
+    handleSearch,
   };
 }

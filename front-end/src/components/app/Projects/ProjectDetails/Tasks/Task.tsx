@@ -6,15 +6,15 @@ import {
   faRotateRight,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../../state/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../../state/store";
 import DeleteAlert from "../../../../DeleteAlert";
 import { useState } from "react";
-import {
-  deleteTask,
-  updateTask,
-} from "../../../../../state/projects/tasksThunk";
 import Spinner from "../../../../Spinner";
+import {
+  useDeleteTaskMutation,
+  useUpdateTaskMutation,
+} from "../../../../../state/projects/projectsApi";
 
 type TaskProps = {
   id: ProjectType["_id"];
@@ -24,24 +24,34 @@ type TaskProps = {
 
 export default function Task({ id, task, owner }: TaskProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
-  const { loadingTasks, loadingTask, error } = useSelector(
-    (state: RootState) => state.projects
-  );
 
-  const dispatch = useDispatch<AppDispatch>();
+  const [deleteTask, { isLoading: isLoadingDelete }] = useDeleteTaskMutation();
+  const [updateTask, { isLoading: isLoadingUpdate }] = useUpdateTaskMutation();
 
   const [isOpen, setIsOpen] = useState(false);
 
   const projectOwner = user?._id === owner._id;
-  const isThisTaskLoading = loadingTask === task._id;
 
-  const handleDelete = () => {
-    dispatch(deleteTask({ id, taskId: task._id }));
+  const handleDelete = async () => {
+    try {
+      await deleteTask({ id, taskId: task._id }).unwrap();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
   };
 
-  const handleUpdateTask = () => {
+  const handleUpdateTask = async () => {
     const newStatus = task.status === "done" ? "in-progress" : "done";
-    dispatch(updateTask({ id, taskId: task._id, status: newStatus }));
+    try {
+      await updateTask({
+        id,
+        taskId: task._id,
+        task: { status: newStatus },
+      }).unwrap();
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
   };
 
   return (
@@ -67,7 +77,7 @@ export default function Task({ id, task, owner }: TaskProps) {
         {projectOwner && (
           <div className="flex gap-2 *:px-3 *:py-1.5 *:bg-gray-900 *:rounded-lg *:hover:bg-gray-700 *:transition-colors *:cursor-pointer *:active:bg-gray-700 *:w-11">
             <button className="text-green-300" onClick={handleUpdateTask}>
-              {isThisTaskLoading ? (
+              {isLoadingUpdate ? (
                 <Spinner size={1} />
               ) : task.status === "done" ? (
                 <FontAwesomeIcon icon={faRotateRight} className="text-xl" />
@@ -87,8 +97,7 @@ export default function Task({ id, task, owner }: TaskProps) {
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
         message="Are you sure you want to delete this task?"
-        loading={loadingTasks}
-        error={error}
+        loading={isLoadingDelete}
       />
     </>
   );

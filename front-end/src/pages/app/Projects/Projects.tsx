@@ -14,25 +14,14 @@ export default function Projects() {
     totalProjects,
     totalPages,
     setPage,
-    selectedDueDayBefore,
-    setSelectedDueDayBefore,
-    selectedDueDayAfter,
-    setSelectedDueDayAfter,
-    searchQuery,
-    setSearchQuery,
-  } = useProjects();
+    handleSearch,
+  } = useProjects({});
 
   return (
     <>
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <SearchBar handleSearch={handleSearch} />
 
-      <Selects
-        filters={filters}
-        selectedDueDayBefore={selectedDueDayBefore}
-        setSelectedDueDayBefore={setSelectedDueDayBefore}
-        selectedDueDayAfter={selectedDueDayAfter}
-        setSelectedDueDayAfter={setSelectedDueDayAfter}
-      />
+      <Selects />
 
       <AddProjectButton />
 

@@ -1,11 +1,11 @@
 import { faTrash, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ProjectType } from "../../../../../utils/zodSchemas";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../../state/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../../state/store";
 import { useState } from "react";
 import DeleteAlert from "../../../../DeleteAlert";
-import { removeMember } from "../../../../../state/projects/membersThunk";
+import { useRemoveMemberMutation } from "../../../../../state/projects/projectsApi";
 
 type MemberProps = {
   id: ProjectType["_id"];
@@ -16,18 +16,20 @@ type MemberProps = {
 
 export default function Member({ id, member, isOwner, owner }: MemberProps) {
   const user = useSelector((state: RootState) => state.currentUser.currentUser);
-  const { loadingMembers, error } = useSelector(
-    (state: RootState) => state.projects
-  );
-  const dispatch = useDispatch<AppDispatch>();
 
   const [isOpen, setIsOpen] = useState(false);
+
+  const [removeMember, { isLoading }] = useRemoveMemberMutation();
 
   const projectOwner = user?._id === owner._id;
   const you = user?._id === member._id;
 
-  const handleDelete = () => {
-    dispatch(removeMember({ id, memberId: member._id }));
+  const handleDelete = async () => {
+    try {
+      await removeMember({ id, memberId: member._id }).unwrap();
+    } catch (error) {
+      console.error("Failed to remove member:", error);
+    }
   };
 
   return (
@@ -56,8 +58,7 @@ export default function Member({ id, member, isOwner, owner }: MemberProps) {
         setIsOpen={setIsOpen}
         handleDelete={handleDelete}
         message={`Are you sure you want remove "${member.username}" from your project?`}
-        loading={loadingMembers}
-        error={error}
+        loading={isLoading}
       />
     </div>
   );

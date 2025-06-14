@@ -6,44 +6,36 @@ import { useCallback, useEffect, useState } from "react";
 import Spinner from "../../../Spinner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../../state/store";
-import {
-  addMember,
-  AddMemberArgs,
-} from "../../../../state/projects/membersThunk";
-import { addTask, AddTaskArgs } from "../../../../state/projects/tasksThunk";
 import clsx from "clsx";
-import { clearError } from "../../../../state/projects/projectsSlice";
+import {
+  useAddMemberMutation,
+  useAddTaskMutation,
+} from "../../../../state/projects/projectsApi";
+import { RTKQueryError } from "../../../../utils/types";
 
-type AsyncThunk = typeof addMember | typeof addTask;
-
-type Props<T extends FieldValues, A extends AsyncThunk> = {
+type Props<T extends FieldValues> = {
   id: ProjectType["_id"];
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   schema: z.ZodType<T>;
   placeholder: string;
   fieldName: Path<T>;
-  loading: boolean;
-  error: string | null;
-  asyncThunk: A;
+  type: "member" | "task";
 };
 
-export default function AddForm<T extends FieldValues, A extends AsyncThunk>({
+export default function AddForm<T extends FieldValues>({
   id,
   isOpen,
   setIsOpen,
   schema,
   placeholder,
   fieldName,
-  loading,
-  error,
-  asyncThunk,
-}: Props<T, A>) {
+  type,
+}: Props<T>) {
   const [errorMsg, setErrorMessage] = useState("");
-  const [success, setSuccess] = useState(false);
-  const dispatch = useDispatch<AppDispatch>();
+
+  const [addMember, { isLoading: isLoadingMember }] = useAddMemberMutation();
+  const [addTask, { isLoading: isLoadingTask }] = useAddTaskMutation();
 
   const {
     register,
@@ -56,32 +48,38 @@ export default function AddForm<T extends FieldValues, A extends AsyncThunk>({
   });
 
   const onSubmit: SubmitHandler<T> = async data => {
-    const args = { id, [fieldName]: data[fieldName] };
-
-    if (asyncThunk === addMember) {
-      const memberArgs = args as AddMemberArgs;
-      dispatch(asyncThunk(memberArgs));
+    if (type === "member") {
+      try {
+        await addMember({ id, username: data.username }).unwrap();
+        handleClose();
+      } catch (error) {
+        const err = error as RTKQueryError;
+        if (err.status === 400) {
+          setErrorMessage("Member already exists");
+        } else if (err.status === 404) {
+          setErrorMessage("Member not found");
+        } else {
+          setErrorMessage("Failed to add member");
+        }
+      }
     }
 
-    if (asyncThunk === addTask) {
-      const taskArgs = args as AddTaskArgs;
-      dispatch(asyncThunk(taskArgs));
+    if (type === "task") {
+      try {
+        await addTask({ id, name: data["name"] }).unwrap();
+        handleClose();
+      } catch (error) {
+        console.log(error);
+        setErrorMessage("Failed to add task");
+      }
     }
-    setSuccess(true);
   };
 
   const handleClose = useCallback(() => {
-    dispatch(clearError());
     setErrorMessage("");
     setIsOpen(false);
-    setSuccess(false);
     reset();
-  }, [setIsOpen, reset, dispatch]);
-
-  useEffect(() => {
-    if (!loading && !error && success) handleClose();
-    if (error && success) setErrorMessage(error);
-  }, [loading, error, success, handleClose]);
+  }, [setIsOpen, reset]);
 
   useEffect(() => {
     if (isOpen) setFocus(fieldName);
@@ -101,13 +99,19 @@ export default function AddForm<T extends FieldValues, A extends AsyncThunk>({
             {...register(fieldName, {
               onChange: () => setErrorMessage(""),
             })}
-            className="border-2 border-gray-700 rounded-lg outline-0 focus:border-2 focus:border-primary px-2 block w-full h-13 bg-gray-800"
+            className={clsx(
+              "border-2 border-gray-700 rounded-lg outline-0 focus:border-2 px-2 block w-full h-13 bg-gray-800",
+              {
+                "focus:border-emerald-400": type === "member",
+                "focus:border-violet-400": type === "task",
+              }
+            )}
           />
           <button
             type="submit"
             className="rounded-lg h-13 w-15 flex items-center justify-center px-4 text-green-400 cursor-pointer hover:bg-gray-800 transition-colors bg-gray-700 active:bg-gray-800"
           >
-            {loading ? (
+            {isLoadingMember || isLoadingTask ? (
               <Spinner size={1} />
             ) : (
               <FontAwesomeIcon icon={faPlus} className="text-xl" />
@@ -142,7 +146,7 @@ export default function AddForm<T extends FieldValues, A extends AsyncThunk>({
       type="button"
       className={clsx(
         "flex items-center justify-center h-13 my-2 px-10 rounded-lg bg-gray-700 w-full md:w-fit border-2 hover:bg-gray-600 transition-colors cursor-pointer shadow-[0_0_2px_2px_#113233] active:bg-gray-600 py-3",
-        asyncThunk === addMember ? "border-emerald-400" : "border-violet-400"
+        type === "member" ? "border-emerald-400" : "border-violet-400"
       )}
       onClick={() => setIsOpen(!isOpen)}
     >

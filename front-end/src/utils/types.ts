@@ -31,4 +31,12 @@ export type Filters = {
   dueDateAfter: string | null | undefined;
   currentPage: number;
   search: string;
+  limit: number;
+};
+
+export type RTKQueryError = {
+  status: number;
+  data?: {
+    message: string;
+  };
 };

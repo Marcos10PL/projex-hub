@@ -9,41 +9,34 @@ import {
   createOrUpdateProjectSchema,
   ProjectType,
 } from "../../../utils/zodSchemas";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../state/store";
-import {
-  createProject,
-  updateProject,
-} from "../../../state/projects/projectThunk";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../../Spinner";
-import { clearError } from "../../../state/projects/projectsSlice";
-import { OptionsStatusNoNull, OptionStatusNoNull } from "../../../utils/types";
+import {
+  OptionsStatusNoNull,
+  OptionStatusNoNull,
+  RTKQueryError,
+} from "../../../utils/types";
+import {
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+} from "../../../state/projects/projectsApi";
 
 type ProjectFormProps = {
   id?: ProjectType["_id"];
   project?: ProjectType;
-  loading: boolean;
-  error: string | null;
   type: "create" | "update";
 };
 
-export default function ProjectForm({
-  id,
-  project,
-  loading,
-  error,
-  type,
-}: ProjectFormProps) {
-  const { project: newProject, projects } = useSelector(
-    (state: RootState) => state.projects
+export default function ProjectForm({ id, project, type }: ProjectFormProps) {
+  const [selectedDueDate, setSelectedDueDate] = useState<Date | undefined>(
+    project?.dueDate ? new Date(project.dueDate) : undefined
   );
-
-  const [selectedDueDate, setSelectedDueDate] = useState<Date>();
   const [status, setStatus] = useState<OptionsStatusNoNull>();
   const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
+
+  const [create, { isLoading: isLoadingCreate }] = useCreateProjectMutation();
+  const [update, { isLoading: isLoadingUpdate }] = useUpdateProjectMutation();
 
   const navigate = useNavigate();
 
@@ -54,8 +47,6 @@ export default function ProjectForm({
   } = useForm({
     resolver: zodResolver(createOrUpdateProjectSchema),
   });
-
-  const dispatch = useDispatch<AppDispatch>();
 
   const onSubmit: SubmitHandler<CreateOrUpdateProjectForm> = async dataForm => {
     if (
@@ -75,22 +66,38 @@ export default function ProjectForm({
       dueDate: selectedDueDate ? selectedDueDate?.toISOString() : null,
     };
 
-    if (id && type === "update") dispatch(updateProject({ id, data }));
-    if (type === "create") dispatch(createProject({ data }));
-
-    setSuccess(true);
-  };
-
-  useEffect(() => {
-    dispatch(clearError());
-    setMessage("");
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (!loading && !error && success) {
-      navigate(`/projects/${id ?? newProject?._id}`);
+    if (id && type === "update") {
+      try {
+        const response = await update({ id, data }).unwrap();
+        if (response.success) {
+          navigate(`/projects/${id}`);
+        }
+      } catch (error) {
+        const err = error as RTKQueryError;
+        if (err.status === 400) {
+          setMessage("Project with this name already exists.");
+        } else {
+          setMessage("An error occurred while updating the project.");
+        }
+      }
     }
-  }, [loading, error, navigate, id, success, newProject?._id, projects]);
+
+    if (type === "create") {
+      try {
+        const response = await create(data).unwrap();
+        if (response.success) {
+          navigate(`/projects/${response.project._id}`);
+        }
+      } catch (error) {
+        const err = error as RTKQueryError;
+        if (err.status === 400) {
+          setMessage("Project with this name already exists.");
+        } else {
+          setMessage("An error occurred while updating the project.");
+        }
+      }
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -145,7 +152,7 @@ export default function ProjectForm({
       )}
 
       <button type="submit" className="button w-40 h-12">
-        {loading ? (
+        {isLoadingCreate || isLoadingUpdate ? (
           <Spinner size={2} />
         ) : type === "create" ? (
           "Create"
@@ -154,7 +161,7 @@ export default function ProjectForm({
         )}
       </button>
 
-      <ErrorMsg message={error || message} />
+      <ErrorMsg message={message} />
     </form>
   );
 }

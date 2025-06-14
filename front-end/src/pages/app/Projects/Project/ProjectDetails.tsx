@@ -4,27 +4,16 @@ import TopPanel from "../../../../components/app/Projects/ProjectDetails/TopPane
 import MainPanel from "../../../../components/app/Projects/ProjectDetails/MainPanel";
 import Members from "../../../../components/app/Projects/ProjectDetails/Members/Members";
 import Tasks from "../../../../components/app/Projects/ProjectDetails/Tasks/Tasks";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../state/store";
-import { useEffect } from "react";
-import { fetchProject } from "../../../../state/projects/projectThunk";
-import { setProject } from "../../../../state/projects/projectsSlice";
+import { useGetProjectQuery } from "../../../../state/projects/projectsApi";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
-  const { projects, project, loadingProject } = useSelector(
-    (state: RootState) => state.projects
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const { data, isLoading, isError } = useGetProjectQuery(id ?? "");
+  const project = data?.project || null;
 
-  useEffect(() => {
-    const selectedProject = projects?.find(project => project._id === id);
-    if (selectedProject !== undefined) dispatch(setProject(selectedProject));
+  if (isLoading) return <Spinner size={2} />;
 
-    if (!selectedProject && id && !project) dispatch(fetchProject({ id }));
-  }, [dispatch, id, projects, project]);
-
-  if (loadingProject) return <Spinner size={2} />;
+  if (isError) return <p className="text-center">Error loading project</p>;
 
   if (!project) return <p className="text-center">Project not found</p>;
 

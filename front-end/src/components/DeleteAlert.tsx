@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import ErrorMsg from "./ErrorMsg";
 import Spinner from "./Spinner";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../state/store";
@@ -11,7 +10,6 @@ type DeleteAlertProps = {
   handleDelete: () => void;
   message: string;
   loading: boolean;
-  error: string | null;
 };
 
 export default function DeleteAlert({
@@ -20,7 +18,6 @@ export default function DeleteAlert({
   handleDelete,
   message,
   loading,
-  error,
 }: DeleteAlertProps) {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -40,6 +37,7 @@ export default function DeleteAlert({
             <button
               className="cursor-pointer text-red-400"
               onClick={handleDelete}
+              disabled={loading}
             >
               {loading ? <Spinner size={1} /> : "delete"}
             </button>
@@ -47,7 +45,6 @@ export default function DeleteAlert({
               cancel
             </button>
           </div>
-          <ErrorMsg message={error} />
         </div>
       </div>
     );
