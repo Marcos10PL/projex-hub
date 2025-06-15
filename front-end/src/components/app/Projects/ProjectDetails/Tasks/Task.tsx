@@ -29,6 +29,7 @@ export default function Task({ id, task, owner }: TaskProps) {
   const [updateTask, { isLoading: isLoadingUpdate }] = useUpdateTaskMutation();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [status, setStatus] = useState(task.status);
 
   const projectOwner = user?._id === owner._id;
 
@@ -49,6 +50,7 @@ export default function Task({ id, task, owner }: TaskProps) {
         taskId: task._id,
         task: { status: newStatus },
       }).unwrap();
+      setStatus(newStatus);
     } catch (error) {
       console.error("Failed to update task:", error);
     }
@@ -76,10 +78,14 @@ export default function Task({ id, task, owner }: TaskProps) {
         {/* BUTTONS */}
         {projectOwner && (
           <div className="flex gap-2 *:px-3 *:py-1.5 *:bg-gray-900 *:rounded-lg *:hover:bg-gray-700 *:transition-colors *:cursor-pointer *:active:bg-gray-700 *:w-11">
-            <button className="text-green-300" onClick={handleUpdateTask}>
+            <button
+              disabled={isLoadingUpdate}
+              className="text-green-300"
+              onClick={handleUpdateTask}
+            >
               {isLoadingUpdate ? (
                 <Spinner size={1} />
-              ) : task.status === "done" ? (
+              ) : status === "done" ? (
                 <FontAwesomeIcon icon={faRotateRight} className="text-xl" />
               ) : (
                 <FontAwesomeIcon icon={faCheck} className="text-xl" />

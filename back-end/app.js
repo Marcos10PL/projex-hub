@@ -11,6 +11,8 @@ import auth from "./middlewares/authentication.js";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import { Server } from "socket.io";
+import http from "http";
 
 // config
 dotenv.config();
@@ -44,11 +46,43 @@ app.use("/api/projects", auth, projectsRouter);
 app.use(notFound);
 app.use(errorHandler);
 
+const server = http.createServer(app);
+
+const io = new Server(server,{
+  cors: {
+    origin: corsUrl,
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("New client connected");
+
+  socket.on("sendMessage", (data) => {
+    console.log("Message received:", data);
+    io.emit("receiveMessage", data);
+  });
+
+  // Handle project updates
+  socket.on("projectUpdate", (data) => {
+    console.log("Project update received:", data);
+    // Broadcast the update to all connected clients
+    io.emit("projectUpdate", data);
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("Client disconnected"); 
+  });
+});
+
+
 // connect to database and start server
 const startServer = async () => {
   try {
     await connect(process.env.MONGO_URI);
-    app.listen(port, () =>
+    server.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)
     );
   } catch (error) {
