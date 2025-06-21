@@ -1,6 +1,6 @@
 # projex-hub 
 
-(still under development - no home page)
+(still under development)
 
 ProjexHUB is a modern project management application built for teams <br />
 that want to organize their workflow efficiently. <br />
