@@ -74,7 +74,10 @@ export const loginSchema = z.object({
   password: userSchema.shape.password,
 });
 
-export const registerSchema = userSchema;
+export const registerSchema = userSchema.omit({
+  _id: true,
+  isActivated: true,
+});
 
 export const forgotPasswordSchema = z.object({
   email: userSchema.shape.email,

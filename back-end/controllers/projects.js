@@ -270,7 +270,7 @@ const addMember = async (req, res) => {
   if (!project) throw new NotFoundError("No project found");
 
   const memberExists = project.members.some(member =>
-    member._id.equals(member._id)
+    member.username === usernameMember
   );
 
   if (memberExists) throw new BadRequestError("Member already exists");

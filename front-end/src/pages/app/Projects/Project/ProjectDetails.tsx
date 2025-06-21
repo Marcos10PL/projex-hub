@@ -5,7 +5,7 @@ import MainPanel from "../../../../components/app/Projects/ProjectDetails/MainPa
 import Members from "../../../../components/app/Projects/ProjectDetails/Members/Members";
 import Tasks from "../../../../components/app/Projects/ProjectDetails/Tasks/Tasks";
 import { useGetProjectQuery } from "../../../../state/projects/projectsApi";
-import Chat from "../../../../components/app/Projects/ProjectDetails/Chat";
+import Chat from "../../../../components/app/Projects/ProjectDetails/Chat/Chat";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +42,7 @@ export default function ProjectDetails() {
 
       <Tasks id={project._id} tasks={project.tasks} owner={project.owner} />
 
-      <Chat />
+      <Chat projectId={project._id} />
     </>
   );
 }

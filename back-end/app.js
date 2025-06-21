@@ -48,7 +48,7 @@ app.use(errorHandler);
 
 const server = http.createServer(app);
 
-const io = new Server(server,{
+const io = new Server(server, {
   cors: {
     origin: corsUrl,
     credentials: true,
@@ -56,27 +56,35 @@ const io = new Server(server,{
   },
 });
 
-io.on("connection", (socket) => {
-  console.log("New client connected");
-
-  socket.on("sendMessage", (data) => {
-    console.log("Message received:", data);
-    io.emit("receiveMessage", data);
+// socket.io connection
+io.on("connection", socket => {
+  socket.on("joinRoom", ({ projectId }) => {
+    socket.join(projectId);
   });
 
-  // Handle project updates
-  socket.on("projectUpdate", (data) => {
-    console.log("Project update received:", data);
-    // Broadcast the update to all connected clients
-    io.emit("projectUpdate", data);
+  socket.on("sendMessage", ({ projectId, message, username }) => {
+    if (!socket.rooms.has(projectId)) return;
+
+    io.to(projectId).emit("receiveMessage", { projectId, username, message });
+    io.to(projectId).emit("stopTyping", { username });
   });
 
-  // Handle disconnection
+  socket.on("typing", ({ projectId, username }) => {
+    if (!socket.rooms.has(projectId)) return;
+
+    socket.to(projectId).emit("typing", { projectId, username });
+  });
+
+  socket.on("stopTyping", ({ projectId, username }) => {
+    if (!socket.rooms.has(projectId)) return;
+
+    socket.to(projectId).emit("stopTyping", { username });
+  });
+
   socket.on("disconnect", () => {
-    console.log("Client disconnected"); 
+    console.log("Client disconnected");
   });
 });
-
 
 // connect to database and start server
 const startServer = async () => {
