@@ -16,10 +16,10 @@ It allows you to create, manage, filter and search your projects. <br />
 
 ## tech
 
--- React.js + Redux <br />
+-- React.js <br />
+-- Redux + RTK Query <br />
 -- TypeScript <br />
 -- Tailwind CSS <br />
-
 -- Node.js + Express <br />
--- MongoDB (Mongoose) <br />
+-- MongoDB + Mongoose <br />
 
